@@ -34,6 +34,8 @@ var carrotmq = function (uri, schema){
   })
 };
 
+module.exports = carrotmq;
+
 function sendToQueue(queue, message, options){
   if (typeof message == 'object'){
     message = new Buffer(JSON.stringify(message), 'utf8');
@@ -63,6 +65,15 @@ carrotmq.queue = function (queue, consumer) {
         that.reply = function (message, options) {
           options = Object.assign(message.properties, options);
           sendToQueue.call({channel}, message.properties.replyTo, message, options)
+        };
+        that.ack = function () {
+          channel.ack(message);
+        };
+        that.nack = function () {
+          channel.nack(message);
+        };
+        that.reject = function () {
+          channel.reject(message);
         };
         consumer.call(that, message);
       })
