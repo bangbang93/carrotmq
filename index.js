@@ -40,8 +40,8 @@ var carrotmq = function (uri, schema){
         }
       })
     });
-    that.emit('ready');
     that.ready = true;
+    that.emit('ready');
     that.on('message', noop);
     that.on('ready', noop);
   }).catch((err)=>{this.emit('error', err)});
@@ -72,7 +72,7 @@ carrotmq.prototype.queue = function (queue, consumer) {
         ctx.channel = channel;
         ctx.reply = function (msg, options) {
           options = Object.assign(message.properties, options);
-          that.sendToQueue.call(message.properties.replyTo, msg, options)
+          that.sendToQueue(message.properties.replyTo, msg, options)
         };
         ctx.ack = function () {
           channel.ack(message);
