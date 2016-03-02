@@ -18,5 +18,12 @@
   "bugs": {
     "url": "https://github.com/bangbang93/carrotmq/issues"
   },
-  "homepage": "https://github.com/bangbang93/carrotmq#readme"
+  "homepage": "https://github.com/bangbang93/carrotmq#readme",
+  "dependencies": {
+    "amqplib": "^0.4.1",
+    "bluebird": "^3.3.3",
+    "bunyan": "^1.7.1",
+    "co": "^4.6.0",
+    "rabbitmq-schema": "^1.1.1"
+  }
 }
