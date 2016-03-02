@@ -123,7 +123,7 @@ carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
 };
 
 carrotmq.prototype.createChannel = function () {
-  return this.createChannel();
+  return this.connection.createChannel();
 };
 
 function makeContent(content){
