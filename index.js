@@ -53,6 +53,7 @@ carrotmq.schema = rabbitmqSchema;
 module.exports = carrotmq;
 
 carrotmq.prototype.queue = function (queue, consumer) {
+  let that = this;
   return this.connection.createChannel()
     .then((channel)=>{
       channel.assertQueue(queue);
@@ -62,25 +63,25 @@ carrotmq.prototype.queue = function (queue, consumer) {
           message,
           channel
         });
-        var that = {};
-        that.carrotmq = this;
-        that.channel = channel;
-        that.reply = function (msg, options) {
+        var ctx = {};
+        ctx.carrotmq = this;
+        ctx.channel = channel;
+        ctx.reply = function (msg, options) {
           options = Object.assign(message.properties, options);
-          this.sendToQueue.call(message.properties.replyTo, msg, options)
+          that.sendToQueue.call(message.properties.replyTo, msg, options)
         };
-        that.ack = function () {
+        ctx.ack = function () {
           channel.ack(message);
         };
-        that.nack = function () {
+        ctx.nack = function () {
           channel.nack(message);
         };
-        that.reject = function () {
+        ctx.reject = function () {
           channel.reject(message);
         };
-        let result = consumer.call(that, message);
+        let result = consumer.call(ctx, message);
         if (result && typeof result.catch == 'function'){
-          result.catch((err)=>this.emit(error, err));
+          result.catch((err)=>that.emit(error, err));
         }
       })
     })
