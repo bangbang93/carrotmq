@@ -8,6 +8,8 @@ var co = require('co');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
+var noop = ()=>{};
+
 var carrotmq = function (uri, schema){
   if (!schema instanceof  rabbitmqSchema){
     throw new TypeError('arguments must be rabbitmqSchema');
@@ -39,6 +41,8 @@ var carrotmq = function (uri, schema){
       })
     });
     that.emit('ready');
+    that.on('message', noop);
+    that.on('ready', noop);
   }).catch((err)=>{this.emit('error', err)});
 };
 
@@ -51,6 +55,11 @@ carrotmq.prototype.queue = function (queue, consumer) {
     .then((channel)=>{
       channel.assertQueue(queue);
       channel.consume(queue, (message)=>{
+        this.emit('message', {
+          queue,
+          message,
+          channel
+        });
         var that = {};
         that.carrotmq = this;
         that.channel = channel;

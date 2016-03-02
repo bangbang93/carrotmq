@@ -33,3 +33,26 @@ mq.queue('fooQueue', function (message){
 mq.sendToQueue('queue', {msg: 'message'});
 mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
+
+## events
+### ready
+emit after connection established
+```javascript
+mq.on('ready', function(){});
+```
+
+### error
+emit when something happened
+```javascript
+mq.on('error', function (err){});
+```
+
+### message
+emit when message come
+```javascript
+mq.on('message', function (data){
+  data.channel; //channel object
+  data.queue   //queue name
+  data.message  //message object
+})
+```
