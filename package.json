@@ -1,0 +1,22 @@
+{
+  "name": "carrotmq",
+  "version": "0.0.1",
+  "description": "easy way to use rabbitmq",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bangbang93/carrotmq.git"
+  },
+  "keywords": [
+    "rabbitmq"
+  ],
+  "author": "bangbang93",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/bangbang93/carrotmq/issues"
+  },
+  "homepage": "https://github.com/bangbang93/carrotmq#readme"
+}
