@@ -6,15 +6,17 @@ var amqplib = require('amqplib');
 var rabbitmqSchema = require('rabbitmq-schema');
 var co = require('co');
 
-var conn;
-
 var carrotmq = function (uri, schema){
   if (!schema instanceof  rabbitmqSchema){
     throw new TypeError('arguments must be rabbitmqSchema');
   }
-  return co(function*(){
+  if (!this instanceof carrotmq){
+    return new carrotmq(uri, schema);
+  }
+  var that = this;
+  co(function*(){
     let connection = yield amqplib.connect(uri);
-    conn = connection;
+    that.connection = connection;
     let channel = yield connection.createChannel();
     let exchanges = schema.getExchanges();
     exchanges.forEach((exchange)=>{
@@ -55,12 +57,13 @@ function sendToQueue(queue, message, options){
   })
 }
 
-carrotmq.queue = function (queue, consumer) {
-  return conn.createChannel()
+carrotmq.prototype.queue = function (queue, consumer) {
+  return this.connection.createChannel()
     .then((channel)=>{
       channel.assertQueue(queue);
       channel.consume(queue, (message)=>{
         var that = {};
+        that.carrotmq = this;
         that.channel = channel;
         that.reply = function (message, options) {
           options = Object.assign(message.properties, options);
@@ -78,4 +81,19 @@ carrotmq.queue = function (queue, consumer) {
         consumer.call(that, message);
       })
     })
+};
+
+carrotmq.prototype.sendToQueue = function (queue, message, options) {
+  return this.connection.createChannel()
+    .then((channel)=>{
+      channel.assertQueue(queue);
+      sendToQueue.call({channel}, queue, message, options);
+    })
+};
+
+carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
+  return this.connection.createChannel()
+    .then((channel)=>{
+      channel.publish(exchange, routingKey, content, options);
+    });
 };

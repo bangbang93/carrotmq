@@ -18,11 +18,18 @@ var schema = new rabbitSchema({
       }
     }]
 })
-var mq = carrotmq('amqp://localhost', schema);
+var mq = new carrotmq('amqp://localhost', schema);
 
 mq.queue('fooQueue', function (message){
     let data = message.content.toString();
     console.log(data);
     this.ack();
-})
+    //this.nack();
+    //this.reject();
+    this.reply({date: new Date}); //reply to message.properties.relyTo
+    this.carrotmq //carrotmq instrance
+});
+
+mq.sendToQueue('queue', {msg: 'message'});
+mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
