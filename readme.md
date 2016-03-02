@@ -3,8 +3,9 @@ a much easy way to use rabbitmq
 
 ## usage
 ```javascript
-var rabbitSchema = require('rabbit-schema');
 var carrotmq = require('carrotmq');
+//var rabbitSchema = require('rabbit-schema');
+var rabbitSchema = carrotmq.schema;
 
 //see https://www.npmjs.com/package/rabbitmq-schema
 var schema = new rabbitSchema({

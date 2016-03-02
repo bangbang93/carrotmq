@@ -48,6 +48,8 @@ var carrotmq = function (uri, schema){
 
 util.inherits(carrotmq, EventEmitter);
 
+carrotmq.schema = rabbitmqSchema;
+
 module.exports = carrotmq;
 
 carrotmq.prototype.queue = function (queue, consumer) {
@@ -76,7 +78,10 @@ carrotmq.prototype.queue = function (queue, consumer) {
         that.reject = function () {
           channel.reject(message);
         };
-        consumer.call(that, message);
+        let result = consumer.call(that, message);
+        if (result && typeof result.catch == 'function'){
+          result.catch((err)=>this.emit(error, err));
+        }
       })
     })
     .catch((err)=>this.emit('error', err));
