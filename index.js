@@ -65,9 +65,9 @@ carrotmq.prototype.queue = function (queue, consumer) {
         var that = {};
         that.carrotmq = this;
         that.channel = channel;
-        that.reply = function (message, options) {
+        that.reply = function (msg, options) {
           options = Object.assign(message.properties, options);
-          this.sendToQueue.call(message.properties.replyTo, message, options)
+          this.sendToQueue.call(message.properties.replyTo, msg, options)
         };
         that.ack = function () {
           channel.ack(message);
