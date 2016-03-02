@@ -16,7 +16,7 @@ var schema = new rabbitmqSchema({
     }
   }]
 });
-var app = new carrotmq('amqp://cofactories:cofactories@10.1.2.1', schema);
+var app = new carrotmq('amqp://10.1.2.1', schema);
 
 app.on('error', function (err) {
   throw err;
@@ -39,7 +39,7 @@ describe('carrotmq', function () {
     app.publish('exchange0', 'foo.bar.key', {time: new Date});
   });
   it('should reject wrong schema', function (done) {
-    let app = new carrotmq('amqp://cofactories:cofactories@10.1.2.1', {});
+    let app = new carrotmq('amqp://10.1.2.1', {});
     app.on('error', function (err) {
       if (err instanceof TypeError){
         done();
@@ -49,6 +49,6 @@ describe('carrotmq', function () {
     })
   });
   it('can init by function call', function (done) {
-    let app = carrotmq('amqp://cofactories:cofactories@10.1.2.1', schema);
+    let app = carrotmq('amqp://10.1.2.1', schema);
   })
 });
