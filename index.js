@@ -83,6 +83,9 @@ carrotmq.prototype.queue = function (queue, consumer) {
         ctx.reject = function () {
           channel.reject(message);
         };
+        ctx.cancel = function () {
+          channel.cancel(message.fields.consumerTag);
+        };
         let result = consumer.call(ctx, message);
         if (result && typeof result.catch == 'function'){
           result.catch((err)=>that.emit(error, err));
