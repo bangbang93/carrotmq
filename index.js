@@ -122,6 +122,10 @@ carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
     .catch((err)=>this.emit('error', err));
 };
 
+carrotmq.prototype.createChannel = function () {
+  return this.createChannel();
+};
+
 function makeContent(content){
   if (typeof content == 'object'){
     return new Buffer(JSON.stringify(content), 'utf8');
