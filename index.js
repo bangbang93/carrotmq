@@ -5,6 +5,8 @@
 var amqplib = require('amqplib');
 var rabbitmqSchema = require('rabbitmq-schema');
 var co = require('co');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 var carrotmq = function (uri, schema){
   if (!schema instanceof  rabbitmqSchema){
@@ -13,6 +15,7 @@ var carrotmq = function (uri, schema){
   if (!this instanceof carrotmq){
     return new carrotmq(uri, schema);
   }
+  EventEmitter.call(this);
   var that = this;
   co(function*(){
     let connection = yield amqplib.connect(uri);
@@ -26,36 +29,22 @@ var carrotmq = function (uri, schema){
         let dest = binding.destination;
         let src = binding.source;
         if (dest.queue){
+          channel.assertQueue(dest.queue, dest.options);
           channel.bindQueue(dest.queue, src.exchange, binding.routingPattern);
         }
         if (dest.exchange){
+          channel.assertExchange(dest.exchange, dest.type, dest.options);
           channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern);
         }
       })
-    })
-  })
+    });
+    that.emit('ready');
+  }).catch((err)=>{this.emit('error', err)});
 };
 
+util.inherits(carrotmq, EventEmitter);
+
 module.exports = carrotmq;
-
-function sendToQueue(queue, message, options){
-  if (typeof message == 'object'){
-    message = new Buffer(JSON.stringify(message), 'utf8');
-  } else if (typeof message == 'string') {
-    message = new Buffer(message, 'utf8');
-  } else if (!Buffer.isBuffer(message)){
-    throw new TypeError('unknown message');
-  }
-
-  if (this.channel){
-    var promise = Promise.resolve(this.channel);
-  } else {
-    promise = conn.createChannel();
-  }
-  promise.then((channel)=>{
-    channel.sendToQueue(queue, message, options);
-  })
-}
 
 carrotmq.prototype.queue = function (queue, consumer) {
   return this.connection.createChannel()
@@ -67,7 +56,7 @@ carrotmq.prototype.queue = function (queue, consumer) {
         that.channel = channel;
         that.reply = function (message, options) {
           options = Object.assign(message.properties, options);
-          sendToQueue.call({channel}, message.properties.replyTo, message, options)
+          this.sendToQueue.call(message.properties.replyTo, message, options)
         };
         that.ack = function () {
           channel.ack(message);
@@ -81,19 +70,36 @@ carrotmq.prototype.queue = function (queue, consumer) {
         consumer.call(that, message);
       })
     })
+    .catch((err)=>this.emit('error', err));
 };
 
 carrotmq.prototype.sendToQueue = function (queue, message, options) {
+  message = makeContent(message);
   return this.connection.createChannel()
     .then((channel)=>{
       channel.assertQueue(queue);
-      sendToQueue.call({channel}, queue, message, options);
+      channel.sendToQueue(queue, message, options);
     })
+    .catch((err)=>this.emit('error', err));
 };
 
 carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
+  content = makeContent(content);
   return this.connection.createChannel()
     .then((channel)=>{
       channel.publish(exchange, routingKey, content, options);
-    });
+    })
+    .catch((err)=>this.emit('error', err));
 };
+
+function makeContent(content){
+  if (typeof content == 'object'){
+    return new Buffer(JSON.stringify(content), 'utf8');
+  } else if (typeof content == 'string') {
+    return new Buffer(content, 'utf8');
+  } else if (!Buffer.isBuffer(content)){
+    throw new TypeError('unknown message');
+  } else {
+    return content;
+  }
+}
