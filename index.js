@@ -56,7 +56,7 @@ module.exports = carrotmq;
 carrotmq.prototype.queue = function (queue, consumer) {
   let that = this;
   if (!that.ready){
-    return that.on('ready', that.queue(queue, consumer))
+    return that.on('ready', ()=>that.queue(queue, consumer))
   }
   return this.connection.createChannel()
     .then((channel)=>{
@@ -96,7 +96,7 @@ carrotmq.prototype.sendToQueue = function (queue, message, options) {
   message = makeContent(message);
   let that = this;
   if (!that.ready){
-    return that.on('ready', that.sendToQueue(queue, message, options))
+    return that.on('ready', ()=>that.sendToQueue(queue, message, options))
   }
   return this.connection.createChannel()
     .then((channel)=>{
@@ -110,7 +110,7 @@ carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
   content = makeContent(content);
   let that = this;
   if (!that.ready){
-    return that.on('ready', that.publish(exchange, routingKey, content, options))
+    return that.on('ready', ()=>that.publish(exchange, routingKey, content, options))
   }
   return this.connection.createChannel()
     .then((channel)=>{
