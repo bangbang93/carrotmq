@@ -21,12 +21,12 @@ var schema = new rabbitSchema({
 })
 var mq = new carrotmq('amqp://localhost', schema);
 
-mq.queue('fooQueue', function (message){
-    let data = message.content.toString();
+mq.queue('fooQueue', function (data){
     console.log(data);
     this.ack();
     //this.nack();
     //this.reject();
+    //this.cancel(); cancel this consumer;
     this.reply({date: new Date}); //reply to message.properties.relyTo
     this.carrotmq //carrotmq instrance
 });
@@ -49,8 +49,8 @@ mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 app.queue('rpcQueue', function (data) {
   this.reply(data);
   this.ack();
-}, true);   /* true here for mark this queue was rpc queue,
-carrotmq will warp real content with json {replyTo: 'queue', content: {buffer}}
+}, true);   /* true here for mark this queue is a rpc queue,
+carrotmq will wrap real content with json {replyTo: 'queue', content: {buffer}}
 for replyTo properties,because of rabbitMQ will ignore
 message sent to exchange with vanilla replyTo ,
 if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/
