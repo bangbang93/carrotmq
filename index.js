@@ -7,6 +7,7 @@ var rabbitmqSchema = require('rabbitmq-schema');
 var co = require('co');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var Promise = require('bluebird');
 
 var noop = ()=>{};
 
@@ -14,7 +15,7 @@ var carrotmq = function (uri, schema){
   if (!schema instanceof  rabbitmqSchema){
     throw new TypeError('arguments must be rabbitmqSchema');
   }
-  if (!this instanceof carrotmq){
+  if (!(this instanceof carrotmq)){
     return new carrotmq(uri, schema);
   }
   EventEmitter.call(this);
@@ -53,14 +54,13 @@ carrotmq.schema = rabbitmqSchema;
 
 module.exports = carrotmq;
 
-carrotmq.prototype.queue = function (queue, consumer) {
+carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
   let that = this;
   if (!that.ready){
     return that.on('ready', ()=>that.queue(queue, consumer))
   }
   return this.connection.createChannel()
     .then((channel)=>{
-      channel.assertQueue(queue);
       channel.consume(queue, (message)=>{
         this.emit('message', {
           queue,
@@ -68,11 +68,23 @@ carrotmq.prototype.queue = function (queue, consumer) {
           channel
         });
         var ctx = {};
+        if (rpcQueue) {
+          let content = JSON.parse(message.content.toString());
+          ctx.replyTo = content.replyTo;
+          ctx.content = new Buffer(content.content.data);
+          ctx.content = JSON.parse(ctx.content.toString());
+        } else {
+          ctx.content = JSON.parse(message.content.toString());
+        }
         ctx.carrotmq = this;
         ctx.channel = channel;
         ctx.reply = function (msg, options) {
+          let replyTo = ctx.replyTo || message.properties.replyTo;
+          if (!replyTo){
+            throw new Error('empty reply queue');
+          }
           options = Object.assign(message.properties, options);
-          that.sendToQueue(message.properties.replyTo, msg, options)
+          that.sendToQueue(replyTo, msg, options)
         };
         ctx.ack = function () {
           channel.ack(message);
@@ -86,7 +98,7 @@ carrotmq.prototype.queue = function (queue, consumer) {
         ctx.cancel = function () {
           channel.cancel(message.fields.consumerTag);
         };
-        let result = consumer.call(ctx, message);
+        let result = consumer.call(ctx, ctx.content);
         if (result && typeof result.catch == 'function'){
           result.catch((err)=>that.emit(error, err));
         }
@@ -103,7 +115,6 @@ carrotmq.prototype.sendToQueue = function (queue, message, options) {
   }
   return this.connection.createChannel()
     .then((channel)=>{
-      channel.assertQueue(queue);
       channel.sendToQueue(queue, message, options);
     })
     .catch((err)=>this.emit('error', err));
@@ -119,6 +130,32 @@ carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
     .then((channel)=>{
       channel.publish(exchange, routingKey, content, options);
     })
+    .catch((err)=>this.emit('error', err));
+};
+
+carrotmq.prototype.rpc = function (exchange, routingKey, content, options) {
+  content = makeContent(content);
+  let that = this;
+  if (!that.ready){
+    return that.on('ready', ()=>that.publish(exchange, routingKey, content, options))
+  }
+  return co(function*(){
+    let channel = yield that.connection.createChannel();
+    let queue = yield channel.assertQueue('', {
+      exclusive: true
+    });
+    return new Promise(function (resolve, reject) {
+      that.queue(queue.queue, function(data){
+        resolve.call(this, data);
+        this.cancel();
+      });
+      content = makeContent({
+        content,
+        replyTo: queue.queue
+      });
+      channel.publish(exchange, routingKey, content, options);
+    })
+  })
     .catch((err)=>this.emit('error', err));
 };
 

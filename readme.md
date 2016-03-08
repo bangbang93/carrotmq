@@ -35,6 +35,32 @@ mq.sendToQueue('queue', {msg: 'message'});
 mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
 
+## RPC Over Exchange
+```javascript
+
+//{
+//    routingPattern: 'rpc.#',
+//   destination: {
+//      queue: 'rpcQueue',
+//      messageSchema: {}
+//    }
+//  }
+
+app.queue('rpcQueue', function (data) {
+  this.reply(data);
+  this.ack();
+}, true);   /* true here for mark this queue was rpc queue,
+carrotmq will warp real content with json {replyTo: 'queue', content: {buffer}}
+for replyTo properties,because of rabbitMQ will ignore
+message sent to exchange with vanilla replyTo ,
+if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/
+
+let time = new Date();
+app.rpc('exchange0', 'rpc.rpc', {time}).then((data)=>{
+  //data: {time: time}
+})
+```
+
 ## events
 ### ready
 emit after connection established
