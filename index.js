@@ -167,15 +167,22 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consu
     return new Promise(function (resolve, reject) {
       that.queue(queue.queue, function(data){
         this.cancel();
-        let maybePromise = consumer.call(this, data);
-        channel.close();
-        if (maybePromise && typeof maybePromise.then == 'function'){
-          maybePromise.then(resolve);
-        } else {
-          resolve(maybePromise);
-        }
-        if (maybePromise && typeof maybePromise.reject == 'function'){
-          maybePromise.reject(reject);
+        let maybePromise;
+        try{
+          maybePromise = consumer.call(this, data);
+          if (maybePromise && typeof maybePromise.then == 'function'){
+            return maybePromise;
+          } else {
+            return resolve(maybePromise);
+          }
+        } catch (e){
+          if (maybePromise && typeof maybePromise.reject == 'function'){
+            return maybePromise
+          } else {
+            return reject(e);
+          }
+        } finally {
+          channel.close();
         }
       });
     })
