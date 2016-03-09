@@ -70,9 +70,9 @@ describe('carrotmq', function () {
   it('rpc', function (done) {
     app.queue('rpcQueue', function (data) {
       console.log(data);
-      data.replyTo = this.replyTo;
       this.reply(data);
       this.ack();
+      this.cancel();
     }, true);
     let time = new Date();
     app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
@@ -86,5 +86,20 @@ describe('carrotmq', function () {
           done(new Error('wrong time',  data.time, time));
         }
       })
+  });
+  it('rpc error', function (done) {
+    app.queue('rpcQueue', function (data) {
+      this.reply({err: 'error message'});
+      this.ack();
+    }, true);
+    let time = new Date();
+    app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
+      this.ack();
+      throw data.err;
+    })
+    .catch((err)=>{
+      Assert(err == 'error message');
+      done();
+    })
   })
 });

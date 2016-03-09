@@ -187,7 +187,6 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consu
       });
     })
   })
-    .catch((err)=>this.emit('error', err));
 };
 
 carrotmq.prototype.createChannel = function () {
