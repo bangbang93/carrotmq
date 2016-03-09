@@ -148,7 +148,7 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consu
   content = makeContent(content);
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.publish(exchange, routingKey, content, options))
+    return that.on('ready', ()=>that.rpc(exchange, routingKey, content, options, consumer))
   }
   return co(function*(){
     let channel = yield that.connection.createChannel();
