@@ -97,6 +97,7 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
         };
         ctx.cancel = function () {
           channel.cancel(message.fields.consumerTag);
+          channel.close();
         };
         let result = consumer.call(ctx, ctx.content);
         if (result && typeof result.catch == 'function'){
@@ -116,6 +117,7 @@ carrotmq.prototype.sendToQueue = function (queue, message, options) {
   return this.connection.createChannel()
     .then((channel)=>{
       channel.sendToQueue(queue, message, options);
+      channel.close();
     })
     .catch((err)=>this.emit('error', err));
 };
@@ -129,11 +131,16 @@ carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
   return this.connection.createChannel()
     .then((channel)=>{
       channel.publish(exchange, routingKey, content, options);
+      channel.close();
     })
     .catch((err)=>this.emit('error', err));
 };
 
-carrotmq.prototype.rpc = function (exchange, routingKey, content, options) {
+carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consumer) {
+  if (arguments.length == 4){
+    consumer =  options;
+    options = {};
+  }
   content = makeContent(content);
   let that = this;
   if (!that.ready){
@@ -142,19 +149,22 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options) {
   return co(function*(){
     let channel = yield that.connection.createChannel();
     let queue = yield channel.assertQueue('', {
-      exclusive: true
+      autoDelete: true
     });
-    return new Promise(function (resolve, reject) {
-      that.queue(queue.queue, function(data){
-        resolve.call(this, data);
-        this.cancel();
-      });
-      content = makeContent({
-        content,
-        replyTo: queue.queue
-      });
-      channel.publish(exchange, routingKey, content, options);
-    })
+    that.queue(queue.queue, function(data){
+      let maybePromise = consumer.call(this, data);
+      this.cancel();
+      if (maybePromise && typeof maybePromise.then == 'function'){
+        maybePromise.then(()=>channel.close());
+      } else {
+        channel.close();
+      }
+    });
+    content = makeContent({
+      content,
+      replyTo: queue.queue
+    });
+    channel.publish(exchange, routingKey, content, options);
   })
     .catch((err)=>this.emit('error', err));
 };

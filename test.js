@@ -5,6 +5,7 @@
 var carrotmq = require('./');
 var rabbitmqSchema = require('rabbitmq-schema');
 var Assert = require('assert');
+var co = require('co');
 
 var schema = new rabbitmqSchema({
   exchange: 'exchange0',
@@ -29,6 +30,7 @@ let uri = 'amqp://cofactories:cofactories@10.1.2.1';
 var app = new carrotmq(uri, schema);
 
 app.on('error', function (err) {
+  console.log('got error');
   throw err;
 });
 
@@ -67,11 +69,15 @@ describe('carrotmq', function () {
   });
   it('rpc', function (done) {
     app.queue('rpcQueue', function (data) {
+      console.log(data);
+      data.replyTo = this.replyTo;
       this.reply(data);
       this.ack();
     }, true);
     let time = new Date();
-    app.rpc('exchange0', 'rpc.rpc', {time}).then((data)=>{
+    app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
+      this.ack();
+      console.log(data);
       if (new Date(data.time).valueOf() == time.valueOf()){
         done();
       } else {
