@@ -101,16 +101,16 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
         };
         ctx.cancel = function () {
           channel.cancel(message.fields.consumerTag);
-          channel.close();
+          //channel.close();
         };
+        channel.on('error', function (err) {
+          err.message = 'Channel Error: ' + err.message;
+          that.emit('error', err);
+        });
         let result = consumer.call(ctx, ctx.content);
         if (result && typeof result.catch == 'function'){
           result.catch((err)=>that.emit(error, err));
         }
-        channel.on('error', function (err) {
-          err.message = 'Channel Error: ' + err.message;
-          that.emit('error', err);
-        })
       })
     })
     .catch((err)=>this.emit('error', err));
@@ -159,20 +159,26 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consu
     let queue = yield channel.assertQueue('', {
       autoDelete: true
     });
-    that.queue(queue.queue, function(data){
-      let maybePromise = consumer.call(this, data);
-      this.cancel();
-      if (maybePromise && typeof maybePromise.then == 'function'){
-        maybePromise.then(()=>channel.close());
-      } else {
-        channel.close();
-      }
-    });
     content = makeContent({
       content,
       replyTo: queue.queue
     });
     channel.publish(exchange, routingKey, content, options);
+    return new Promise(function (resolve, reject) {
+      that.queue(queue.queue, function(data){
+        this.cancel();
+        let maybePromise = consumer.call(this, data);
+        channel.close();
+        if (maybePromise && typeof maybePromise.then == 'function'){
+          maybePromise.then(resolve);
+        } else {
+          resolve(maybePromise);
+        }
+        if (maybePromise && typeof maybePromise.reject == 'function'){
+          maybePromise.reject(reject);
+        }
+      });
+    })
   })
     .catch((err)=>this.emit('error', err));
 };

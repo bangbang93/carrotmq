@@ -58,6 +58,10 @@ if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {
 let time = new Date();
 app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
 //data: {time: time}
+this.ack();
+return data;
+}).then(function (data){
+//data: {time: time}
 })
 ```
 

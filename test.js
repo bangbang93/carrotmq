@@ -77,12 +77,14 @@ describe('carrotmq', function () {
     let time = new Date();
     app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
       this.ack();
-      console.log(data);
-      if (new Date(data.time).valueOf() == time.valueOf()){
-        done();
-      } else {
-        done(new Error('wrong time',  data.time, time));
-      }
+      return data;
     })
+      .then(function (data) {
+        if (new Date(data.time).valueOf() == time.valueOf()){
+          done();
+        } else {
+          done(new Error('wrong time',  data.time, time));
+        }
+      })
   })
 });
