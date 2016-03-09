@@ -56,8 +56,8 @@ message sent to exchange with vanilla replyTo ,
 if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/
 
 let time = new Date();
-app.rpc('exchange0', 'rpc.rpc', {time}).then((data)=>{
-  //data: {time: time}
+app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
+//data: {time: time}
 })
 ```
 

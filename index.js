@@ -67,7 +67,11 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
           message,
           channel
         });
-        var ctx = {};
+        var ctx = {
+          message,
+          fields: message.fields,
+          properties: message.properties
+        };
         if (rpcQueue) {
           let content = JSON.parse(message.content.toString());
           ctx.replyTo = content.replyTo;
