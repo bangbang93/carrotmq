@@ -113,11 +113,11 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
 };
 
 carrotmq.prototype.sendToQueue = function (queue, message, options) {
-  message = makeContent(message);
   let that = this;
   if (!that.ready){
     return that.on('ready', ()=>that.sendToQueue(queue, message, options))
   }
+  message = makeContent(message);
   return this.connection.createChannel()
     .then((channel)=>{
       channel.sendToQueue(queue, message, options);
@@ -127,11 +127,11 @@ carrotmq.prototype.sendToQueue = function (queue, message, options) {
 };
 
 carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
-  content = makeContent(content);
   let that = this;
   if (!that.ready){
     return that.on('ready', ()=>that.publish(exchange, routingKey, content, options))
   }
+  content = makeContent(content);
   return this.connection.createChannel()
     .then((channel)=>{
       channel.publish(exchange, routingKey, content, options);
@@ -145,11 +145,11 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consu
     consumer =  options;
     options = {};
   }
-  content = makeContent(content);
   let that = this;
   if (!that.ready){
     return that.on('ready', ()=>that.rpc(exchange, routingKey, content, options, consumer))
   }
+  content = makeContent(content);
   return co(function*(){
     let channel = yield that.connection.createChannel();
     let queue = yield channel.assertQueue('', {

@@ -1,6 +1,6 @@
 {
   "name": "carrotmq",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "easy way to use rabbitmq",
   "main": "index.js",
   "scripts": {
