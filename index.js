@@ -107,6 +107,10 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
         if (result && typeof result.catch == 'function'){
           result.catch((err)=>that.emit(error, err));
         }
+        channel.on('error', function (err) {
+          err.message = 'Channel Error: ' + err.message;
+          that.emit('error', err);
+        })
       })
     })
     .catch((err)=>this.emit('error', err));
