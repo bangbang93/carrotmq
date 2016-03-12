@@ -201,11 +201,12 @@ carrotmq.prototype.rpc = function (queue, content, options, consumer) {
   content = makeContent(content);
   return co(function*(){
     let channel = yield that.connection.createChannel();
-    let queue = yield channel.assertQueue('', {
+    let replyQueue = yield channel.assertQueue('', {
       autoDelete: true
     });
+    channel.sendToQueue(queue, content, {replyTo: replyQueue.queue});
     return new Promise(function (resolve, reject) {
-      that.queue(queue.queue, function (data) {
+      that.queue(replyQueue.queue, function (data) {
         this.cancel();
         let maybePromise;
         try{
