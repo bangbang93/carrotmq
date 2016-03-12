@@ -144,14 +144,14 @@ carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
     .catch((err)=>this.emit('error', err));
 };
 
-carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consumer) {
+carrotmq.prototype.rpcExchange = function (exchange, routingKey, content, options, consumer) {
   if (arguments.length == 4){
     consumer =  options;
     options = {};
   }
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.rpc(exchange, routingKey, content, options, consumer))
+    return that.on('ready', ()=>that.rpcExchange(exchange, routingKey, content, options, consumer))
   }
   content = makeContent(content);
   return co(function*(){
@@ -185,6 +185,40 @@ carrotmq.prototype.rpc = function (exchange, routingKey, content, options, consu
           channel.close();
         }
       });
+    })
+  })
+};
+
+carrotmq.prototype.rpc = function (queue, content, options, consumer) {
+  let that = this;
+  if (!that.ready){
+    return that.on('ready', ()=>that.rpc(exchange, routingKey, content, options, consumer))
+  }
+  content = makeContent(content);
+  return co(function*(){
+    let channel = yield that.connection.createChannel();
+    let queue = yield channel.assertQueue('', {
+      autoDelete: true
+    });
+    that.queue(queue.queue, function (data) {
+      this.cancel();
+      let maybePromise;
+      try{
+        maybePromise = consumer.call(this, data);
+        if (maybePromise && typeof maybePromise.then == 'function'){
+          return maybePromise;
+        } else {
+          return resolve(maybePromise);
+        }
+      } catch (e){
+        if (maybePromise && typeof maybePromise.reject == 'function'){
+          return maybePromise
+        } else {
+          return reject(e);
+        }
+      } finally {
+        channel.close();
+      }
     })
   })
 };
