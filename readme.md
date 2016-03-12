@@ -56,7 +56,7 @@ message sent to exchange with vanilla replyTo ,
 if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/
 
 let time = new Date();
-app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
+app.rpcExchange('exchange0', 'rpc.rpc', {time}, function (data){
 //data: {time: time}
 this.ack();
 return data;

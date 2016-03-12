@@ -190,6 +190,10 @@ carrotmq.prototype.rpcExchange = function (exchange, routingKey, content, option
 };
 
 carrotmq.prototype.rpc = function (queue, content, options, consumer) {
+  if (arguments.length == 3){
+    consumer =  options;
+    options = {};
+  }
   let that = this;
   if (!that.ready){
     return that.on('ready', ()=>that.rpc(exchange, routingKey, content, options, consumer))
