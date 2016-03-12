@@ -57,7 +57,7 @@ module.exports = carrotmq;
 carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.queue(queue, consumer))
+    return that.on('ready', ()=>that.queue(queue, consumer, rpcQueue))
   }
   return this.connection.createChannel()
     .then((channel)=>{
