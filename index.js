@@ -61,6 +61,10 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
   }
   return this.connection.createChannel()
     .then((channel)=>{
+      channel.on('error', function (err) {
+        err.message = 'Channel Error: ' + err.message;
+        that.emit('error', err);
+      });
       channel.consume(queue, (message)=>{
         this.emit('message', {
           queue,
@@ -103,10 +107,6 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
           channel.cancel(message.fields.consumerTag);
           //channel.close();
         };
-        channel.on('error', function (err) {
-          err.message = 'Channel Error: ' + err.message;
-          that.emit('error', err);
-        });
         let result = consumer.call(ctx, ctx.content);
         if (result && typeof result.catch == 'function'){
           result.catch((err)=>that.emit(error, err));
