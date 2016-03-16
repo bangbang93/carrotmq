@@ -25,22 +25,22 @@ var carrotmq = function (uri, schema){
     that.connection = connection;
     let channel = yield connection.createChannel();
     let exchanges = schema.getExchanges();
-    exchanges.forEach((exchange)=>{
-      channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
+    yield Promise.each(exchanges, co.wrap(function*(exchange){
+      yield channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
       let bindings = exchange.getDirectBindings();
-      bindings.forEach((binding)=>{
+      return yield Promise.each(bindings, co.wrap(function*(binding){
         let dest = binding.destination;
         let src = binding.source;
         if (dest.queue){
-          channel.assertQueue(dest.queue, dest.options);
-          channel.bindQueue(dest.queue, src.exchange, binding.routingPattern);
+          yield channel.assertQueue(dest.queue, dest.options);
+          yield channel.bindQueue(dest.queue, src.exchange, binding.routingPattern);
         }
         if (dest.exchange){
-          channel.assertExchange(dest.exchange, dest.type, dest.options);
-          channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern);
+          yield channel.assertExchange(dest.exchange, dest.type, dest.options);
+          yield channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern);
         }
-      })
-    });
+      }));
+    }));
     that.ready = true;
     that.emit('ready');
     that.on('message', noop);

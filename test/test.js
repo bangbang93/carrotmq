@@ -2,7 +2,7 @@
  * Created by bangbang93 on 16-3-2.
  */
 'use strict';
-var carrotmq = require('./');
+var carrotmq = require('./../index');
 var rabbitmqSchema = require('rabbitmq-schema');
 var Assert = require('assert');
 var co = require('co');
