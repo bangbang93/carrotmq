@@ -73,7 +73,7 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue, opts) {
         err.message = 'Channel Error: ' + err.message;
         that.emit('error', err);
       });
-      if (!that.getQueueByName(queue)){
+      if (!that.schema.getQueueByName(queue)){
         channel.assertQueue(queue, opts);
       }
       channel.consume(queue, (message)=>{
