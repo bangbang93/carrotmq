@@ -57,7 +57,9 @@ module.exports = carrotmq;
 carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.queue(queue, consumer, rpcQueue))
+    return new Promise(function (resolve) {
+      that.on('ready', ()=>that.queue(queue, consumer, rpcQueue).then(resolve))
+    })
   }
   return this.connection.createChannel()
     .then((channel)=>{
@@ -119,7 +121,9 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
 carrotmq.prototype.sendToQueue = function (queue, message, options) {
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.sendToQueue(queue, message, options))
+    return new Promise(function (resolve) {
+      that.on('ready', ()=>that.sendToQueue(queue, message, options).then(resolve))
+    })
   }
   message = makeContent(message);
   return this.connection.createChannel()
@@ -133,7 +137,9 @@ carrotmq.prototype.sendToQueue = function (queue, message, options) {
 carrotmq.prototype.publish = function (exchange, routingKey, content, options) {
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.publish(exchange, routingKey, content, options))
+    return new Promise(function (resovle) {
+      that.on('ready', ()=>that.publish(exchange, routingKey, content, options).then(resovle))
+    })
   }
   content = makeContent(content);
   return this.connection.createChannel()
@@ -151,7 +157,9 @@ carrotmq.prototype.rpcExchange = function (exchange, routingKey, content, option
   }
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.rpcExchange(exchange, routingKey, content, options, consumer))
+    return new Promise(function (resolve) {
+      that.on('ready', ()=>that.rpcExchange(exchange, routingKey, content, options, consumer).then(resolve));
+    })
   }
   content = makeContent(content);
   return co(function*(){
@@ -196,7 +204,9 @@ carrotmq.prototype.rpc = function (queue, content, options, consumer) {
   }
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.rpc(queue, content, options, consumer))
+    return new Promise(function (resolve) {
+      that.on('ready', ()=>that.rpc(queue, content, options, consumer).then(resolve))
+    })
   }
   content = makeContent(content);
   return co(function*(){
@@ -233,7 +243,9 @@ carrotmq.prototype.rpc = function (queue, content, options, consumer) {
 carrotmq.prototype.createChannel = function () {
   let that = this;
   if (!that.ready){
-    return that.on('ready', ()=>that.createChannel())
+    return new Promise(function (resolve) {
+      that.on('ready', ()=>that.createChannel().then(resolve))
+    })
   }
   return this.connection.createChannel();
 };
