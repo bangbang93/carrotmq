@@ -20,6 +20,8 @@ var carrotmq = function (uri, schema){
   }
   EventEmitter.call(this);
   var that = this;
+  this.uri = uri;
+  this.schema = schema;
   co(function*(){
     let connection = yield amqplib.connect(uri);
     that.connection = connection;
@@ -54,12 +56,16 @@ carrotmq.schema = rabbitmqSchema;
 
 module.exports = carrotmq;
 
-carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
+carrotmq.prototype.queue = function (queue, consumer, rpcQueue, opts) {
   let that = this;
   if (!that.ready){
     return new Promise(function (resolve) {
-      that.on('ready', ()=>that.queue(queue, consumer, rpcQueue).then(resolve))
+      that.on('ready', ()=>that.queue(queue, consumer, rpcQueue, opts).then(resolve))
     })
+  }
+  if (!opts && typeof rpcQueue == 'object'){
+    opts = rpcQueue;
+    rpcQueue = false;
   }
   return this.connection.createChannel()
     .then((channel)=>{
@@ -67,6 +73,9 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue) {
         err.message = 'Channel Error: ' + err.message;
         that.emit('error', err);
       });
+      if (!that.getQueueByName(queue)){
+        channel.assertQueue(queue, opts);
+      }
       channel.consume(queue, (message)=>{
         this.emit('message', {
           queue,
