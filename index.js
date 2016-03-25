@@ -180,7 +180,8 @@ carrotmq.prototype.rpcExchange = function (exchange, routingKey, content, option
   return co(function*(){
     let channel = yield that.connection.createChannel();
     let queue = yield channel.assertQueue('', {
-      autoDelete: true
+      autoDelete: true,
+      durable: false
     });
     content = makeContent({
       content,
@@ -233,7 +234,8 @@ carrotmq.prototype.rpc = function (queue, content, options, consumer) {
   return co(function*(){
     let channel = yield that.connection.createChannel();
     let replyQueue = yield channel.assertQueue('', {
-      autoDelete: true
+      autoDelete: true,
+      durable: false
     });
     channel.sendToQueue(queue, content, {replyTo: replyQueue.queue});
     return new Promise(function (resolve, reject) {
