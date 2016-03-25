@@ -164,6 +164,12 @@ carrotmq.prototype.rpcExchange = function (exchange, routingKey, content, option
     consumer =  options;
     options = {};
   }
+  if (!consumer){
+    consumer = function (data) {
+      this.ack();
+      return data;
+    }
+  }
   let that = this;
   if (!that.ready){
     return new Promise(function (resolve) {
@@ -210,6 +216,12 @@ carrotmq.prototype.rpc = function (queue, content, options, consumer) {
   if (arguments.length == 3){
     consumer =  options;
     options = {};
+  }
+  if (!consumer){
+    consumer = function (data) {
+      this.ack();
+      return data;
+    }
   }
   let that = this;
   if (!that.ready){
