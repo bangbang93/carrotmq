@@ -120,7 +120,7 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue, opts) {
         };
         let result = consumer.call(ctx, ctx.content);
         if (result && typeof result.catch == 'function'){
-          result.catch((err)=>that.emit(error, err));
+          result.catch((err)=>that.emit('error', err));
         }
       })
     })
