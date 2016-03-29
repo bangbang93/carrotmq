@@ -9,11 +9,11 @@ a much easy way to use rabbitmq
 ## usage
 ```javascript
 var carrotmq = require('carrotmq');
-//var rabbitSchema = require('rabbit-schema');
-var rabbitSchema = carrotmq.schema;
+//var rabbitmqSchema = require('rabbitmq-schema');
+var rabbitmqSchema = carrotmq.schema;
 
 //see https://www.npmjs.com/package/rabbitmq-schema
-var schema = new rabbitSchema({
+var schema = new rabbitmqSchema({
     exchange: 'exchange0',
     type: 'topic',
     bindings: [{
