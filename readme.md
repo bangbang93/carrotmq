@@ -35,6 +35,16 @@ mq.sendToQueue('queue', {msg: 'message'});
 mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
 
+## RPC
+```javascript
+mq.rpc('queue', {data: new Date}, function(data){  //same as queue consumer
+  this.ack();
+  return data;
+}).then((data)=>{
+  //above return value
+});
+```
+
 ## RPC Over Exchange
 ```javascript
 
