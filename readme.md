@@ -28,6 +28,8 @@ var schema = new rabbitmqSchema({
 })
 var mq = new carrotmq('amqp://localhost', schema);
 
+var publisher = new carrotmq('amqp://localhost'); //also can use without schema
+
 mq.queue('fooQueue', function (data){
     console.log(data);
     this.ack();

@@ -12,7 +12,7 @@ var Promise = require('bluebird');
 var noop = ()=>{};
 
 var carrotmq = function (uri, schema){
-  if (!schema instanceof  rabbitmqSchema){
+  if (schema && !schema instanceof  rabbitmqSchema){
     throw new TypeError('arguments must be rabbitmqSchema');
   }
   if (!(this instanceof carrotmq)){
@@ -26,6 +26,13 @@ var carrotmq = function (uri, schema){
     let connection = yield amqplib.connect(uri);
     that.connection = connection;
     let channel = yield connection.createChannel();
+    if (!schema){
+      that.ready = true;
+      that.emit('ready');
+      that.on('message', noop);
+      that.on('ready', noop);
+      return;
+    }
     let exchanges = schema.getExchanges();
     yield Promise.each(exchanges, co.wrap(function*(exchange){
       yield channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
@@ -73,7 +80,7 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue, opts) {
         err.message = 'Channel Error: ' + err.message;
         that.emit('error', err);
       });
-      if (!queue.startsWith('amq.') && !that.schema.getQueueByName(queue)){
+      if (!queue.startsWith('amq.') && that.schema && !that.schema.getQueueByName(queue)){
         channel.assertQueue(queue, opts);
       }
       channel.consume(queue, (message)=>{
@@ -271,6 +278,10 @@ carrotmq.prototype.createChannel = function () {
     })
   }
   return this.connection.createChannel();
+};
+
+carrotmq.prototype.close = function () {
+  return this.connection.close();
 };
 
 function makeContent(content){

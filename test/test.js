@@ -44,6 +44,10 @@ before(function (done){
   })
 });
 
+after(function () {
+  app.close();
+})
+
 describe('carrotmq', function () {
   it('publish and subscribe', function (done) {
     app.queue('fooQueue', function (message) {
