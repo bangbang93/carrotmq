@@ -4,7 +4,7 @@
   "description": "easy way to use rabbitmq",
   "main": "index.js",
   "engines": {
-    "node": ">=5"
+    "node": ">=6"
   },
   "scripts": {
     "test": "mocha"
