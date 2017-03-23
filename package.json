@@ -4,7 +4,7 @@
   "description": "easy way to use rabbitmq",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,9 @@
     "bunyan": "^1.7.1",
     "co": "^4.6.0",
     "rabbitmq-schema": "^1.1.1"
+  },
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "should": "^11.2.1"
   }
 }

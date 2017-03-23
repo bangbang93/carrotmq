@@ -2,13 +2,14 @@
  * Created by bangbang93 on 16-3-30.
  */
 'use strict';
-var carrotmq = require('./../index');
-var Assert = require('assert');
-var co = require('co');
+const carrotmq = require('./../index');
+const Assert   = require('assert');
 
-let uri = 'amqp://cofactories:cofactories@10.1.2.1';
+const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
 
-var app;
+const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}/${RABBITMQ_HOST}`;
+
+let app;
 
 before(function (done) {
   app = new carrotmq(uri);

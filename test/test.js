@@ -2,32 +2,34 @@
  * Created by bangbang93 on 16-3-2.
  */
 'use strict';
-var carrotmq = require('./../index');
-var rabbitmqSchema = require('rabbitmq-schema');
-var Assert = require('assert');
-var co = require('co');
+const carrotmq       = require('./../index');
+const rabbitmqSchema = require('rabbitmq-schema');
+const Assert         = require('assert');
+const co             = require('co');
 
-var schema = new rabbitmqSchema({
+const schema = new rabbitmqSchema({
   exchange: 'exchange0',
-  type: 'topic',
+  type    : 'topic',
   bindings: [{
     routingPattern: 'foo.bar.#',
-    destination: {
-      queue: 'fooQueue',
+    destination   : {
+      queue        : 'fooQueue',
       messageSchema: {}
     }
   }, {
     routingPattern: 'rpc.#',
-    destination: {
-      queue: 'rpcQueue',
+    destination   : {
+      queue        : 'rpcQueue',
       messageSchema: {}
     }
   }]
 });
 
-let uri = 'amqp://cofactories:cofactories@10.1.2.1';
+const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
 
-var app = new carrotmq(uri, schema);
+const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}/${RABBITMQ_HOST}`;
+
+const app = new carrotmq(uri, schema);
 
 app.on('error', function (err) {
   console.log('got error');

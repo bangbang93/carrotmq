@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "4"
+  - "5"
+  - "6"
+  - "node"
+sudo: required
+services:
+  - rabbitmq
+env:
+  - RABBITMQ_USER=guest
+  - RABBITMQ_PASSWORD=guest
+  - RABBITMQ_HOST=localhost
