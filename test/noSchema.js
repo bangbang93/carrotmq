@@ -7,7 +7,7 @@ const Assert   = require('assert');
 
 const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
 
-const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}/${RABBITMQ_HOST}`;
+const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/`;
 
 let app;
 
