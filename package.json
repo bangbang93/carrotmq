@@ -3,6 +3,9 @@
   "version": "2.7.0",
   "description": "easy way to use rabbitmq",
   "main": "index.js",
+  "engines": {
+    "node": ">=5"
+  },
   "scripts": {
     "test": "mocha"
   },
