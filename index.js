@@ -2,31 +2,32 @@
  * Created by bangbang93 on 16-3-2.
  */
 'use strict';
-var amqplib = require('amqplib');
-var rabbitmqSchema = require('rabbitmq-schema');
-var co = require('co');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var Promise = require('bluebird');
+const amqplib        = require('amqplib');
+const rabbitmqSchema = require('rabbitmq-schema');
+const co             = require('co');
+const EventEmitter   = require('events').EventEmitter;
+const util           = require('util');
+const Promise        = require('bluebird');
 
-var noop = ()=>{};
+const noop = () => {
+};
 
-var carrotmq = function (uri, schema){
-  if (schema && !schema instanceof  rabbitmqSchema){
+const carrotmq = function (uri, schema) {
+  if (schema && !schema instanceof rabbitmqSchema) {
     throw new TypeError('arguments must be rabbitmqSchema');
   }
-  if (!(this instanceof carrotmq)){
+  if (!(this instanceof carrotmq)) {
     return new carrotmq(uri, schema);
   }
   EventEmitter.call(this);
-  var that = this;
-  this.uri = uri;
+  const that  = this;
+  this.uri    = uri;
   this.schema = schema;
-  co(function*(){
-    let connection = yield amqplib.connect(uri);
+  co(function*() {
+    let connection  = yield amqplib.connect(uri);
     that.connection = connection;
-    let channel = yield connection.createChannel();
-    if (!schema){
+    let channel     = yield connection.createChannel();
+    if (!schema) {
       that.ready = true;
       that.emit('ready');
       that.on('message', noop);
@@ -34,17 +35,17 @@ var carrotmq = function (uri, schema){
       return;
     }
     let exchanges = schema.getExchanges();
-    yield Promise.each(exchanges, co.wrap(function*(exchange){
+    yield Promise.each(exchanges, co.wrap(function*(exchange) {
       yield channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
       let bindings = exchange.getDirectBindings();
-      return yield Promise.each(bindings, co.wrap(function*(binding){
+      return yield Promise.each(bindings, co.wrap(function*(binding) {
         let dest = binding.destination;
-        let src = binding.source;
-        if (dest.queue){
+        let src  = binding.source;
+        if (dest.queue) {
           yield channel.assertQueue(dest.queue, dest.options);
           yield channel.bindQueue(dest.queue, src.exchange, binding.routingPattern);
         }
-        if (dest.exchange){
+        if (dest.exchange) {
           yield channel.assertExchange(dest.exchange, dest.type, dest.options);
           yield channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern);
         }
@@ -54,7 +55,9 @@ var carrotmq = function (uri, schema){
     that.emit('ready');
     that.on('message', noop);
     that.on('ready', noop);
-  }).catch((err)=>{this.emit('error', err)});
+  }).catch((err) => {
+    this.emit('error', err)
+  });
 };
 
 util.inherits(carrotmq, EventEmitter);
@@ -89,9 +92,9 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue, opts) {
           message,
           channel
         });
-        var ctx = {
+        const ctx = {
           message,
-          fields: message.fields,
+          fields    : message.fields,
           properties: message.properties
         };
         if (rpcQueue) {
