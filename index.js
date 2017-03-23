@@ -83,7 +83,8 @@ carrotmq.prototype.queue = function (queue, consumer, rpcQueue, opts) {
         err.message = 'Channel Error: ' + err.message;
         that.emit('error', err);
       });
-      if (!queue.startsWith('amq.') && that.schema && !that.schema.getQueueByName(queue)){
+      if ((!queue.startsWith('amq.') && that.schema && !that.schema.getQueueByName(queue))
+        || !that.schema) {
         channel.assertQueue(queue, opts);
       }
       channel.consume(queue, (message)=>{
