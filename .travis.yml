@@ -8,6 +8,4 @@ sudo: required
 services:
   - rabbitmq
 env:
-  - RABBITMQ_USER=guest
-  - RABBITMQ_PASSWORD=guest
-  - RABBITMQ_HOST=localhost
+  - RABBITMQ_USER=guest RABBITMQ_PASSWORD=guest RABBITMQ_HOST=localhost
