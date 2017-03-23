@@ -13,7 +13,7 @@ const schema = new rabbitmqSchema({
   bindings: [{
     routingPattern: 'foo.bar.#',
     destination   : {
-      queue        : 'fooQueue',
+      queue        : 'fooExchangeQueue',
       messageSchema: {}
     }
   }, {
@@ -52,7 +52,7 @@ after(function () {
 
 describe('carrotmq', function () {
   it('publish and subscribe', function (done) {
-    app.queue('fooQueue', function (message) {
+    app.queue('fooExchangeQueue', function (message) {
       this.ack();
       done();
     });
@@ -79,9 +79,9 @@ describe('carrotmq', function () {
       this.reply(data);
       this.ack();
       this.cancel();
-    }, true);
+    });
     let time = new Date();
-    app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
+    app.rpc('rpcQueue', {time}, function (data){
       this.ack();
       return data;
     })
@@ -97,9 +97,9 @@ describe('carrotmq', function () {
     app.queue('rpcQueue', function (data) {
       this.reply({err: 'error message'});
       this.ack();
-    }, true);
+    });
     let time = new Date();
-    app.rpc('exchange0', 'rpc.rpc', {time}, function (data){
+    app.rpc('rpcQueue', {time}, function (data){
       this.ack();
       throw data.err;
     })

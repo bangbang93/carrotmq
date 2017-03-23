@@ -23,6 +23,7 @@ describe('no schema queue', function () {
     this.timeout(5000);
     app.queue('fooQueue', function (data) {
       this.ack();
+      console.log(data);
       Assert.equal(Date.parse(data.date), date.valueOf());
       done();
     });
