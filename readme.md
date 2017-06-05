@@ -11,12 +11,12 @@ a much easy way to use rabbitmq
 
 ## usage
 ```javascript
-var carrotmq = require('carrotmq');
+const carrotmq = require('carrotmq');
 //var rabbitmqSchema = require('rabbitmq-schema');
-var rabbitmqSchema = carrotmq.schema;
+const rabbitmqSchema = carrotmq.schema;
 
 //see https://www.npmjs.com/package/rabbitmq-schema
-var schema = new rabbitmqSchema({
+const schema = new rabbitmqSchema({
     exchange: 'exchange0',
     type: 'topic',
     bindings: [{
@@ -26,10 +26,10 @@ var schema = new rabbitmqSchema({
         messageSchema: {}
       }
     }]
-})
-var mq = new carrotmq('amqp://localhost', schema);
+});
+const mq = new carrotmq('amqp://localhost', schema);
 
-var publisher = new carrotmq('amqp://localhost'); //also can use without schema
+const publisher = new carrotmq('amqp://localhost'); //also can use without schema
 
 mq.queue('fooQueue', function (data){
     console.log(data);
@@ -47,11 +47,10 @@ mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 
 ## RPC
 ```javascript
-mq.rpc('queue', {data: new Date}, function(data){  //same as queue consumer
-  this.ack();
-  return data;
-}).then((data)=>{
-  //above return value
+mq.rpc('queue', {data: new Date})
+.then((reply)=>{
+  reply.ack();
+  console.log(reply.data); //some reply result
 });
 ```
 
@@ -76,12 +75,10 @@ message sent to exchange with vanilla replyTo ,
 if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/
 
 let time = new Date();
-app.rpcExchange('exchange0', 'rpc.rpc', {time}, function (data){
-//data: {time: time}
-this.ack();
-return data;
-}).then(function (data){
-//data: {time: time}
+app.rpcExchange('exchange0', 'rpc.rpc', {time})
+.then(function (reply){
+  reply.ack();
+  console.log(reply.data)//{time: time}
 })
 ```
 
@@ -106,4 +103,31 @@ mq.on('message', function (data){
   data.queue   //queue name
   data.message  //message object
 })
+```
+
+## upgrade
+### V2 to V3
+#### breaking change
+  - mq.rpc() and mq.rpcExchange() method remove the 4th consumer argument.And using Promise
+  
+  used to
+  ```js
+    mq.rpc('someQueue', {data}, function(data) {
+      const that = this;
+      // or some data async logic
+      doSomeThingAsync(data)
+      .then(() => that.ack())
+      .catch(() => that.nack());
+      return data;
+    }).then((data) => console.log(data));
+```
+now can replaced by
+```js
+    let reply = await mq.rpc('someQueue', {data});
+    try {
+      await doSomeThingAsync(reply.data);
+      reply.ack();
+    } catch (e) {
+      reply.nack();
+    }
 ```

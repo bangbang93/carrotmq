@@ -68,11 +68,6 @@ describe('carrotmq', function () {
       }
     })
   });
-  it('can init by function call', function (done) {
-    let app = carrotmq(uri, schema);
-    app.on('ready', done);
-    app.on('error', done);
-  });
   it('rpc', function (done) {
     app.queue('rpcQueue', function (data) {
       console.log(data);
@@ -81,12 +76,11 @@ describe('carrotmq', function () {
       this.cancel();
     });
     let time = new Date();
-    app.rpc('rpcQueue', {time}, function (data){
-      this.ack();
-      return data;
-    })
-      .then(function (data) {
-        if (new Date(data.time).valueOf() == time.valueOf()){
+    app.rpc('rpcQueue', {time})
+      .then(function (reply) {
+        reply.ack();
+        const data = reply.data;
+        if (new Date(data.time).valueOf() === time.valueOf()){
           done();
         } else {
           done(new Error('wrong time',  data.time, time));
@@ -99,13 +93,17 @@ describe('carrotmq', function () {
       this.ack();
     });
     let time = new Date();
-    app.rpc('rpcQueue', {time}, function (data){
-      this.ack();
-      throw data.err;
-    })
-    .catch((err)=>{
-      Assert(err == 'error message');
-      done();
+    app.rpc('rpcQueue', {time})
+      .then((reply)=>{
+        reply.ack();
+        const data = reply.data;
+        const err = data.err;
+        Assert(err === 'error message');
+        done();
     })
   })
+});
+
+process.on('unhandledRejection', function (err) {
+  console.log(err);
 });
