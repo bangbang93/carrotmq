@@ -100,7 +100,11 @@ class carrotmq extends EventEmitter {
           }
           ctx.carrotmq = this;
           ctx.channel = channel;
+          ctx._isAcked = false;
           ctx.reply = function (msg, options) {
+            if (!ctx._isAcked) {
+              ctx.ack();
+            }
             let replyTo = ctx.replyTo || message.properties.replyTo;
             if (!replyTo){
               throw new Error('empty reply queue');
@@ -109,21 +113,39 @@ class carrotmq extends EventEmitter {
             that.sendToQueue(replyTo, msg, options)
           };
           ctx.ack = function () {
+            ctx._isAcked = true;
             channel.ack(message);
           };
           ctx.nack = function () {
+            ctx._isAcked = true;
             channel.nack(message);
           };
           ctx.reject = function () {
+            ctx._isAcked = true;
             channel.reject(message);
           };
           ctx.cancel = function () {
+            ctx._isAcked = true;
             channel.cancel(message.fields.consumerTag);
             //channel.close();
           };
-          let result = consumer.call(ctx, ctx.content);
-          if (result && typeof result.catch === 'function'){
-            result.catch((err)=>that.emit('error', err));
+          try {
+            let result = consumer.call(ctx, ctx.content);
+            if (result && typeof result === 'object' && typeof result.catch === 'function'){
+              result.catch((err)=>{
+                if (!ctx._isAcked) {
+                  ctx.reject();
+                }
+                ctx._isAcked = true;
+                that.emit('error', err);
+              });
+            }
+          } catch (e) {
+            if (!ctx._isAcked) {
+              ctx.reject();
+            }
+            ctx._isAcked = true;
+            that.emit('error', err);
           }
         })
       })

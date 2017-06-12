@@ -39,6 +39,8 @@ mq.queue('fooQueue', function (data){
     //this.cancel(); cancel this consumer;
     this.reply({date: new Date}); //reply to message.properties.relyTo
     this.carrotmq //carrotmq instrance
+    this.channel  //current channel
+    return Promise.reject(); // or throw new Error('some thing happened') will execute `this.reject()` if this message hadn't been ack
 });
 
 mq.sendToQueue('queue', {msg: 'message'});
