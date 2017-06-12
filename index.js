@@ -79,7 +79,7 @@ class carrotmq extends EventEmitter {
           || !that.schema) {
           channel.assertQueue(queue, opts);
         }
-        channel.consume(queue, (message)=>{
+        return channel.consume(queue, (message)=>{
           this.emit('message', {
             queue,
             message,
@@ -102,9 +102,6 @@ class carrotmq extends EventEmitter {
           ctx.channel = channel;
           ctx._isAcked = false;
           ctx.reply = function (msg, options) {
-            if (!ctx._isAcked) {
-              ctx.ack();
-            }
             let replyTo = ctx.replyTo || message.properties.replyTo;
             if (!replyTo){
               throw new Error('empty reply queue');
@@ -114,19 +111,19 @@ class carrotmq extends EventEmitter {
           };
           ctx.ack = function () {
             ctx._isAcked = true;
-            channel.ack(message);
+            return channel.ack(message);
           };
           ctx.nack = function () {
             ctx._isAcked = true;
-            channel.nack(message);
+            return channel.nack(message);
           };
           ctx.reject = function () {
             ctx._isAcked = true;
-            channel.reject(message);
+            return channel.reject(message);
           };
           ctx.cancel = function () {
             ctx._isAcked = true;
-            channel.cancel(message.fields.consumerTag);
+            return channel.cancel(message.fields.consumerTag);
             //channel.close();
           };
           try {
