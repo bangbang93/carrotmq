@@ -47,6 +47,9 @@ mq.sendToQueue('queue', {msg: 'message'});
 mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
 
+## Message Validation
+
+
 ## RPC
 ```javascript
 mq.rpc('queue', {data: new Date})

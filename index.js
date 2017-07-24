@@ -8,6 +8,7 @@ const co             = require('co');
 const EventEmitter   = require('events').EventEmitter;
 const util           = require('util');
 const Promise        = require('bluebird');
+const ValidateError  = require('./lib/ValidateError');
 
 const noop = () => {
 };
@@ -98,6 +99,7 @@ class carrotmq extends EventEmitter {
           } else {
             ctx.content = JSON.parse(message.content.toString());
           }
+
           ctx.carrotmq = this;
           ctx.channel = channel;
           ctx._isAcked = false;
@@ -126,6 +128,22 @@ class carrotmq extends EventEmitter {
             return channel.cancel(message.fields.consumerTag);
             //channel.close();
           };
+
+          if (this.schema) {
+            try {
+              this.schema.validateMessage(queue, ctx.content);
+            } catch (e) {
+              const err = new ValidateError(message, channel, queue, e);
+              if (this.listenerCount(`validateError:${queue}`) !== 0){
+                return this.emit(`validateError:${queue}`, err);
+              }
+              if (rpcQueue || message.properties.replyTo){
+                ctx.reply({err});
+              }
+              return ctx.ack();
+            }
+          }
+
           try {
             let result = consumer.call(ctx, ctx.content);
             if (result && typeof result === 'object' && typeof result.catch === 'function'){
@@ -156,6 +174,9 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.sendToQueue(queue, message, options).then(resolve))
       })
     }
+    if (this.schema) {
+      this.schema.validateMessage(queue, message);
+    }
     message = makeContent(message);
     return this.connection.createChannel()
       .then((channel)=>{
@@ -172,6 +193,9 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.publish(exchange, routingKey, content, options).then(resovle))
       })
     }
+    if (this.schema) {
+      this.schema.validateMessage(exchange, routingKey, content);
+    }
     content = makeContent(content);
     return this.connection.createChannel()
       .then((channel)=>{
@@ -187,6 +211,9 @@ class carrotmq extends EventEmitter {
       return new Promise(function (resolve) {
         that.on('ready', ()=>that.rpcExchange(exchange, routingKey, content, options).then(resolve));
       })
+    }
+    if (this.schema) {
+      this.schema.validateMessage(exchange, routingKey, content);
     }
     content = makeContent(content);
     return co(function*(){
@@ -228,6 +255,9 @@ class carrotmq extends EventEmitter {
       return new Promise(function (resolve) {
         that.on('ready', ()=>that.rpc(queue, content, options).then(resolve))
       })
+    }
+    if (this.schema) {
+      this.schema.validateMessage(queue, content);
     }
     content = makeContent(content);
     return co(function*() {
@@ -276,6 +306,7 @@ class carrotmq extends EventEmitter {
 
 
 carrotmq.schema = rabbitmqSchema;
+carrotmq.ValidateError = ValidateError;
 
 module.exports = carrotmq;
 
