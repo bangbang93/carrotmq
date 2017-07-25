@@ -154,7 +154,7 @@ describe('carrotmq', function () {
       this.cancel();
       done(new Error('should validation failed'));
     });
-    app.once('validationError:schemaQueue', async function (err) {
+    app.once('validationError:schemaQueue', function (err) {
       const ValidateError = require('../lib/ValidationError');
       Assert(err instanceof ValidateError);
       err.channel.ack(err.content);
