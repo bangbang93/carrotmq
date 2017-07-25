@@ -22,6 +22,24 @@ const schema = new rabbitmqSchema({
       queue        : 'rpcQueue',
       messageSchema: {}
     }
+  }, {
+    routingPattern: 'schema',
+    destination: {
+      queue: 'schemaQueue',
+      messageSchema: {
+        name: 'schema-test',
+        type: 'object',
+        properties: {
+          time: {
+            type: 'string',
+          },
+          arr: {
+            type: 'array',
+          },
+        },
+        required: ['time', 'arr'],
+      }
+    }
   }]
 });
 
@@ -32,8 +50,8 @@ const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/`;
 const app = new carrotmq(uri, schema);
 
 app.on('error', function (err) {
-  console.log('got error');
-  throw err;
+  console.error(err);
+  process.exit(-1);
 });
 
 before(function (done){
@@ -48,7 +66,7 @@ before(function (done){
 
 after(function () {
   app.close();
-})
+});
 
 describe('carrotmq', function () {
   it('publish and subscribe', function (done) {
@@ -101,6 +119,27 @@ describe('carrotmq', function () {
         Assert(err === 'error message');
         done();
     })
+  });
+  it('schema validate failed', function (done) {
+    app.once('validateError:schemaQueue', function (err) {
+      const ValidateError = require('../lib/ValidateError');
+      Assert(err instanceof ValidateError);
+      err.channel.ack(err.content);
+      done();
+    });
+    app.sendToQueue('schemaQueue', {time: new Date()});
+  });
+  it('schema validate success', function (done) {
+    const now = new Date();
+    app.queue('schemaQueue', function (data) {
+      Assert(new Date(data.time).valueOf() === now.valueOf());
+      Assert(Array.isArray(data.arr));
+      done();
+    });
+    app.sendToQueue('schemaQueue', {
+      time: now,
+      arr: [1, 2, 3],
+    });
   })
 });
 
