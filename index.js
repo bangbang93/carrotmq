@@ -174,7 +174,8 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.sendToQueue(queue, message, options).then(resolve))
       })
     }
-    if ((options && !options.ignoreValidate) && this.schema && this.schema.getQueueByName(queue)) {
+    const ignoreValidate = options ? options.ignoreValidate : false;
+    if (ignoreValidate && this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, message);
     }
     message = makeContent(message);
