@@ -140,7 +140,7 @@ describe('carrotmq', function () {
       err.channel.ack(err.content);
       done();
     });
-    app.sendToQueue('schemaQueue', {time: new Date().toJSON()}, {ignoreValidate: true});
+    app.sendToQueue('schemaQueue', {time: new Date().toJSON()}, {skipValidate: true});
   });
   it('schema validate success', function (done) {
     const now = new Date();
