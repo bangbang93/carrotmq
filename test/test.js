@@ -120,14 +120,26 @@ describe('carrotmq', function () {
         done();
     })
   });
-  it('schema validate failed', function (done) {
+  it('schema validate failed in sendToQueue', function (done) {
+    try {
+      app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
+    } catch (e) {
+      const ValidateError = require('../lib/ValidateError');
+      if (e instanceof ValidateError){
+        done()
+      } else {
+        done(e);
+      }
+    }
+  });
+  it('schema validate failed in consumer', function (done) {
     app.once('validateError:schemaQueue', function (err) {
       const ValidateError = require('../lib/ValidateError');
       Assert(err instanceof ValidateError);
       err.channel.ack(err.content);
       done();
     });
-    app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
+    app.sendToQueue('schemaQueue', {time: new Date().toJSON()}, {ignoreValidate: true});
   });
   it('schema validate success', function (done) {
     const now = new Date();
