@@ -160,7 +160,7 @@ class carrotmq extends EventEmitter {
               ctx.reject();
             }
             ctx._isAcked = true;
-            that.emit('error', err);
+            that.emit('error', e);
           }
         })
       })
