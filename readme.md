@@ -48,7 +48,55 @@ mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
 
 ## Message Validation
-
+`messageSchema` defines as json-schema on queue. Message will be validate when they comes.
+If failed while validation, a `validateError:${queue}` event will emit.
+If no listener attached on this event, this fail will be silent ignore and message will be acked.
+```js
+const schema = new rabbitmqSchema({
+    exchange: 'exchange0',
+    type: 'topic',
+    bindings: [{
+      routingPattern: 'foo.bar.#',
+      destination: {
+        queue: 'fooQueue',
+        messageSchema: {
+         title: 'push-target',
+         type: 'object',
+         properties: {
+           userIds: {
+             type: 'array',
+           },
+           message: {
+             type: 'object',
+             properties: {
+               text: {
+                 type: 'string',
+               },
+               title: {
+                 type: 'string',
+               }
+             },
+             required: ['text', 'title'],
+           },
+         },
+         required: ['userIds', 'message'],
+       }
+      }
+    }]
+});
+const mq = new carrotmq('amqp://localhost', schema);
+mq.queue('fooQueue', function(data) {
+  console.log(data);
+});
+mq.on('validateError:fooQueue', function(err) {
+  const ValidateError = require('carrotmq/lib/ValidateError');
+  err instanceof ValidateError === true;
+  console.error(err);
+  err.channel.ack(err.content);
+  err.channel; //queue channel
+  err.content; //raw content (Buffer)
+})
+```
 
 ## RPC
 ```javascript
