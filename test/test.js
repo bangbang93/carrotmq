@@ -126,11 +126,12 @@ describe('carrotmq', function () {
     } catch (e) {
       const ValidateError = require('../lib/ValidateError');
       if (e instanceof ValidateError){
-        done()
+        return done()
       } else {
-        done(e);
+        return done(e);
       }
     }
+    return done(new Error('no error throw'));
   });
   it('schema validate failed in consumer', function (done) {
     app.once('validateError:schemaQueue', function (err) {
