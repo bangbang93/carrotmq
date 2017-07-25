@@ -193,7 +193,7 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.publish(exchange, routingKey, content, options).then(resovle))
       })
     }
-    if (this.schema && this.schema.getQueueByName(queue)) {
+    if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, content);
     }
     content = makeContent(content);
@@ -212,7 +212,7 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.rpcExchange(exchange, routingKey, content, options).then(resolve));
       })
     }
-    if (this.schema && this.schema.getQueueByName(queue)) {
+    if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, content);
     }
     content = makeContent(content);

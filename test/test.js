@@ -127,7 +127,7 @@ describe('carrotmq', function () {
       err.channel.ack(err.content);
       done();
     });
-    app.sendToQueue('schemaQueue', {time: new Date()});
+    app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
   });
   it('schema validate success', function (done) {
     const now = new Date();
@@ -137,7 +137,7 @@ describe('carrotmq', function () {
       done();
     });
     app.sendToQueue('schemaQueue', {
-      time: now,
+      time: now.toJSON(),
       arr: [1, 2, 3],
     });
   })
