@@ -129,7 +129,7 @@ class carrotmq extends EventEmitter {
             //channel.close();
           };
 
-          if (this.schema) {
+          if (this.schema && this.schema.getQueueByName(queue)) {
             try {
               this.schema.validateMessage(queue, ctx.content);
             } catch (e) {
@@ -174,7 +174,7 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.sendToQueue(queue, message, options).then(resolve))
       })
     }
-    if (this.schema) {
+    if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, message);
     }
     message = makeContent(message);
@@ -193,7 +193,7 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.publish(exchange, routingKey, content, options).then(resovle))
       })
     }
-    if (this.schema) {
+    if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(exchange, routingKey, content);
     }
     content = makeContent(content);
@@ -212,7 +212,7 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.rpcExchange(exchange, routingKey, content, options).then(resolve));
       })
     }
-    if (this.schema) {
+    if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(exchange, routingKey, content);
     }
     content = makeContent(content);
@@ -256,7 +256,7 @@ class carrotmq extends EventEmitter {
         that.on('ready', ()=>that.rpc(queue, content, options).then(resolve))
       })
     }
-    if (this.schema) {
+    if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, content);
     }
     content = makeContent(content);
