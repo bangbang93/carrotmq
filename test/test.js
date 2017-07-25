@@ -124,8 +124,8 @@ describe('carrotmq', function () {
     try {
       app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
     } catch (e) {
-      const ValidateError = require('../lib/ValidateError');
-      if (e instanceof ValidateError){
+      const SchemaValidationError = require('rabbitmq-schema/lib/schema-validation-error');
+      if (e instanceof SchemaValidationError){
         return done()
       } else {
         return done(e);
