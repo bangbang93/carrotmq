@@ -133,12 +133,28 @@ describe('carrotmq', function () {
     }
     return done(new Error('no error throw'));
   });
-  it('schema validate failed in consumer', function (done) {
-    app.queue('schemaQueue', function () {
+  it('schema validate success', function (done) {
+    const now = new Date();
+    app.queue('schemaQueue', function (data) {
+      console.log(now, data);
+      Assert(new Date(data.time).valueOf() === now.valueOf());
+      Assert(Array.isArray(data.arr));
       this.ack();
+      this.cancel().then(() => done());
+    });
+    app.sendToQueue('schemaQueue', {
+      time: now.toJSON(),
+      arr: [1, 2, 3],
+    });
+  });
+  it('schema validate failed in consumer', function (done) {
+    app.queue('schemaQueue', function (data) {
+      console.log(data);
+      this.ack();
+      this.cancel();
       done(new Error('should validation failed'));
     });
-    app.once('validationError:schemaQueue', function (err) {
+    app.once('validationError:schemaQueue', async function (err) {
       const ValidateError = require('../lib/ValidationError');
       Assert(err instanceof ValidateError);
       err.channel.ack(err.content);
@@ -146,18 +162,6 @@ describe('carrotmq', function () {
     });
     app.sendToQueue('schemaQueue', {time: new Date().toJSON()}, {skipValidate: true});
   });
-  it('schema validate success', function (done) {
-    const now = new Date();
-    app.queue('schemaQueue', function (data) {
-      Assert(new Date(data.time).valueOf() === now.valueOf());
-      Assert(Array.isArray(data.arr));
-      done();
-    });
-    app.sendToQueue('schemaQueue', {
-      time: now.toJSON(),
-      arr: [1, 2, 3],
-    });
-  })
 });
 
 process.on('unhandledRejection', function (err) {
