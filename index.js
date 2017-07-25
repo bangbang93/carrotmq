@@ -8,7 +8,7 @@ const co             = require('co');
 const EventEmitter   = require('events').EventEmitter;
 const util           = require('util');
 const Promise        = require('bluebird');
-const ValidateError  = require('./lib/ValidateError');
+const ValidationError  = require('./lib/ValidationError');
 
 const noop = () => {
 };
@@ -133,9 +133,9 @@ class carrotmq extends EventEmitter {
             try {
               this.schema.validateMessage(queue, ctx.content);
             } catch (e) {
-              const err = new ValidateError(message, channel, queue, e);
-              if (this.listenerCount(`validateError:${queue}`) !== 0){
-                return this.emit(`validateError:${queue}`, err);
+              const err = new ValidationError(message, channel, queue, e);
+              if (this.listenerCount(`validationError:${queue}`) !== 0){
+                return this.emit(`validationError:${queue}`, err);
               }
               if (rpcQueue || message.properties.replyTo){
                 ctx.reply({err});
@@ -307,7 +307,7 @@ class carrotmq extends EventEmitter {
 
 
 carrotmq.schema = rabbitmqSchema;
-carrotmq.ValidateError = ValidateError;
+carrotmq.validationError = ValidationError;
 
 module.exports = carrotmq;
 

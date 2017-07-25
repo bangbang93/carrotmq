@@ -88,7 +88,7 @@ const mq = new carrotmq('amqp://localhost', schema);
 mq.queue('fooQueue', function(data) {
   console.log(data);
 });
-mq.on('validateError:fooQueue', function(err) {
+mq.on('validationError:fooQueue', function(err) {
   const ValidateError = require('carrotmq/lib/ValidateError');
   err instanceof ValidateError === true;
   console.error(err);
