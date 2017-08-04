@@ -13,7 +13,6 @@ const noop = () => {
 
 class carrotmq extends EventEmitter {
   constructor(uri, schema) {
-    console.log(schema instanceof rabbitmqSchema);
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema');
     }
