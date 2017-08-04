@@ -5,6 +5,7 @@
 const carrotmq       = require('../lib/index');
 const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
+const ValidateError  = require('../lib/lib/ValidationError');
 require('should');
 
 const schema = new rabbitmqSchema({
@@ -131,17 +132,13 @@ describe('carrotmq', function () {
     })
   });
   it('schema validate failed in sendToQueue', function () {
-    try {
-      return app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
-    } catch (e) {
-      const SchemaValidationError = require('rabbitmq-schema/lib/schema-validation-error');
-      if (e instanceof SchemaValidationError){
-        return;
-      } else {
-        throw e;
-      }
-    }
-    throw new Error('no error throw');
+      return app.sendToQueue('schemaQueue', {time: new Date().toJSON()})
+        .then(() => {
+          throw new Error('no error throw')
+        })
+        .catch((e) => {
+          e.should.instanceof(ValidateError);
+        })
   });
   it('schema validate success', function (done) {
     const now = new Date();
@@ -165,7 +162,6 @@ describe('carrotmq', function () {
       done(new Error('should validation failed'));
     });
     app.once('validationError:schemaQueue', (err) => {
-      const ValidateError = require('../lib/lib/ValidationError');
       err.should.instanceof(ValidateError);
       err.channel.ack(err.content);
       done();

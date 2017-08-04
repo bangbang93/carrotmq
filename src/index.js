@@ -170,7 +170,11 @@ class carrotmq extends EventEmitter {
     }
     const skipValidate = options ? options.skipValidate : false;
     if (!skipValidate && this.schema && this.schema.getQueueByName(queue)) {
-      this.schema.validateMessage(queue, message);
+      try {
+        this.schema.validateMessage(queue, message);
+      } catch (e) {
+        throw new ValidationError(message, null, queue, e);
+      }
     }
     message = makeContent(message);
     const channel = await this.connection.createChannel();
