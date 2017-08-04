@@ -3,8 +3,6 @@
  */
 'use strict';
 const carrotmq = require('../lib/index');
-const Assert   = require('assert');
-require("babel-register");
 require('should');
 
 const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;

@@ -3,7 +3,6 @@ before_script:
  - npm i
  - npm run build
 node_js:
-  - "4"
   - "6"
   - "node"
 sudo: required
