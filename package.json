@@ -8,11 +8,12 @@
   },
   "scripts": {
     "test": "mocha",
-    "build": "babel src --out-dir lib"
+    "build": "babel src --out-dir lib",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/bangbang93/carrotmq.git"
+    "url": "git+ssh://git@github.com/bangbang93/carrotmq.pgit"
   },
   "keywords": [
     "rabbitmq"
