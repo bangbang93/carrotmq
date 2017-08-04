@@ -2,7 +2,7 @@
  * Created by bangbang93 on 16-3-30.
  */
 'use strict';
-const carrotmq = require('./../index');
+const carrotmq = require('../lib/index');
 const Assert   = require('assert');
 
 const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;

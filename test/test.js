@@ -2,7 +2,7 @@
  * Created by bangbang93 on 16-3-2.
  */
 'use strict';
-const carrotmq       = require('./../index');
+const carrotmq       = require('../lib/index');
 const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
 const co             = require('co');
@@ -155,7 +155,7 @@ describe('carrotmq', function () {
       done(new Error('should validation failed'));
     });
     app.once('validationError:schemaQueue', function (err) {
-      const ValidateError = require('../lib/ValidationError');
+      const ValidateError = require('../src/lib/ValidationError');
       Assert(err instanceof ValidateError);
       err.channel.ack(err.content);
       done();
