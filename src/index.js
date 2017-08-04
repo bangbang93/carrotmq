@@ -18,46 +18,44 @@ class carrotmq extends EventEmitter {
     super();
     this.uri    = uri;
     this.schema = schema;
-    this.connect();
+    this.connect().catch((err) => {
+      this.emit(err);
+    });
   }
 
   async connect(){
     const that = this;
-    try {
-      let connection  = await amqplib.connect(that.uri);
-      that.connection = connection;
-      let channel     = await connection.createChannel();
-      if (!this.schema) {
-        that.ready = true;
-        that.emit('ready');
-        that.on('message', noop);
-        that.on('ready', noop);
-        return;
-      }
-      let exchanges = this.schema.getExchanges();
-      for(const exchange of exchanges) {
-        await channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
-        let bindings = exchange.getDirectBindings();
-        for(const binding of bindings) {
-          let dest = binding.destination;
-          let src  = binding.source;
-          if (dest.queue) {
-            await channel.assertQueue(dest.queue, dest.options);
-            await channel.bindQueue(dest.queue, src.exchange, binding.routingPattern);
-          }
-          if (dest.exchange) {
-            await channel.assertExchange(dest.exchange, dest.type, dest.options);
-            await channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern);
-          }
-        }
-      }
+    let connection  = await amqplib.connect(that.uri);
+    that.connection = connection;
+    let channel     = await connection.createChannel();
+    if (!this.schema) {
       that.ready = true;
       that.emit('ready');
       that.on('message', noop);
       that.on('ready', noop);
-    } catch(err) {
-      that.emit('error', err)
+      return;
     }
+    let exchanges = this.schema.getExchanges();
+    for(const exchange of exchanges) {
+      await channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
+      let bindings = exchange.getDirectBindings();
+      for(const binding of bindings) {
+        let dest = binding.destination;
+        let src  = binding.source;
+        if (dest.queue) {
+          await channel.assertQueue(dest.queue, dest.options);
+          await channel.bindQueue(dest.queue, src.exchange, binding.routingPattern);
+        }
+        if (dest.exchange) {
+          await channel.assertExchange(dest.exchange, dest.type, dest.options);
+          await channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern);
+        }
+      }
+    }
+    that.ready = true;
+    that.emit('ready');
+    that.on('message', noop);
+    that.on('ready', noop);
   }
 
   async queue(queue, consumer, rpcQueue, opts) {
