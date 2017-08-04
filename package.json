@@ -25,6 +25,7 @@
   "homepage": "https://github.com/bangbang93/carrotmq#readme",
   "dependencies": {
     "amqplib": "^0.5.1",
+    "babel-runtime": "^6.25.0",
     "bluebird": "^3.5.0",
     "bunyan": "^1.7.1",
     "rabbitmq-schema": "^1.1.1"
