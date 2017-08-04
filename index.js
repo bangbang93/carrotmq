@@ -19,21 +19,25 @@ class carrotmq extends EventEmitter {
       throw new TypeError('arguments must be rabbitmqSchema');
     }
     super();
-    const that  = this;
     this.uri    = uri;
     this.schema = schema;
-    co(function*() {
+    this.connect();
+  }
+
+  connect(){
+    const that = this;
+    return co(function*() {
       let connection  = yield amqplib.connect(that.uri);
       that.connection = connection;
       let channel     = yield connection.createChannel();
-      if (!schema) {
+      if (!this.schema) {
         that.ready = true;
         that.emit('ready');
         that.on('message', noop);
         that.on('ready', noop);
         return;
       }
-      let exchanges = schema.getExchanges();
+      let exchanges = this.schema.getExchanges();
       yield Promise.each(exchanges, co.wrap(function*(exchange) {
         yield channel.assertExchange(exchange.exchange, exchange.type, exchange.options);
         let bindings = exchange.getDirectBindings();
