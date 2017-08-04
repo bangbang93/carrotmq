@@ -4,6 +4,8 @@
 'use strict';
 const carrotmq = require('../lib/index');
 const Assert   = require('assert');
+require("babel-register");
+require('should');
 
 const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
 
@@ -24,7 +26,7 @@ describe('no schema queue', function () {
     app.queue('fooQueue', function (data) {
       this.ack();
       console.log(data);
-      Assert.equal(Date.parse(data.date), date.valueOf());
+      Date.parse(data.date).should.equal(date.valueOf());
       done();
     });
 

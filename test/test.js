@@ -7,6 +7,7 @@ const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
 const ValidateError  = require('../lib/lib/ValidationError');
 require('should');
+require("babel-register");
 
 const schema = new rabbitmqSchema({
   exchange: 'exchange0',
