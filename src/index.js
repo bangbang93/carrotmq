@@ -6,13 +6,15 @@ const amqplib        = require('amqplib');
 const rabbitmqSchema = require('rabbitmq-schema');
 const EventEmitter   = require('events').EventEmitter;
 const ValidationError  = require('./lib/ValidationError');
+const Promise = require('bluebird');
 
 const noop = () => {
 };
 
 class carrotmq extends EventEmitter {
   constructor(uri, schema) {
-    if (schema && !schema instanceof rabbitmqSchema) {
+    console.log(schema instanceof rabbitmqSchema);
+    if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema');
     }
     super();
@@ -70,12 +72,8 @@ class carrotmq extends EventEmitter {
       rpcQueue = false;
     }
     const channel = await this.connection.createChannel();
-    channel.on('error', function (err) {
-      err.message = 'Channel Error: ' + err.message;
-      that.emit('error', err);
-    });
-    if ((!queue.startsWith('amq.') && that.schema && !that.schema.getQueueByName(queue))
-      || !that.schema) {
+    if ((!queue.startsWith('amq.') && this.schema && !this.schema.getQueueByName(queue))
+      || !this.schema) {
       channel.assertQueue(queue, opts);
     }
     return channel.consume(queue, (message)=>{

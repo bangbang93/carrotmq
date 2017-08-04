@@ -25,14 +25,16 @@
   "homepage": "https://github.com/bangbang93/carrotmq#readme",
   "dependencies": {
     "amqplib": "^0.5.1",
+    "bluebird": "^3.5.0",
     "bunyan": "^1.7.1",
     "rabbitmq-schema": "^1.1.1"
   },
   "devDependencies": {
-    "mocha": "^3.2.0",
-    "should": "^11.2.1",
     "babel-cli": "^6.24.1",
+    "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.0"
+    "babel-preset-env": "^1.6.0",
+    "mocha": "^3.2.0",
+    "should": "^11.2.1"
   }
 }

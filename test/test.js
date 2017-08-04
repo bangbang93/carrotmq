@@ -5,7 +5,7 @@
 const carrotmq       = require('../lib/index');
 const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
-const co             = require('co');
+require('should');
 
 const schema = new rabbitmqSchema({
   exchange: 'exchange0',
@@ -77,7 +77,17 @@ describe('carrotmq', function () {
     app.publish('exchange0', 'foo.bar.key', {time: new Date});
   });
   it('should reject wrong schema', function (done) {
-    let app = new carrotmq(uri, {});
+    let app;
+    try {
+      app = new carrotmq(uri, {});
+      console.log(app);
+    } catch (e) {
+      if (e instanceof TypeError){
+        done();
+      } else {
+        done(e);
+      }
+    }
     app.on('error', function (err) {
       if (err instanceof TypeError){
         done();
@@ -120,18 +130,18 @@ describe('carrotmq', function () {
         done();
     })
   });
-  it('schema validate failed in sendToQueue', function (done) {
+  it('schema validate failed in sendToQueue', async function () {
     try {
-      app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
+      await app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
     } catch (e) {
       const SchemaValidationError = require('rabbitmq-schema/lib/schema-validation-error');
       if (e instanceof SchemaValidationError){
-        return done()
+        return;
       } else {
-        return done(e);
+        throw e;
       }
     }
-    return done(new Error('no error throw'));
+    throw new Error('no error throw');
   });
   it('schema validate success', function (done) {
     const now = new Date();
@@ -154,9 +164,9 @@ describe('carrotmq', function () {
       this.cancel();
       done(new Error('should validation failed'));
     });
-    app.once('validationError:schemaQueue', function (err) {
-      const ValidateError = require('../src/lib/ValidationError');
-      Assert(err instanceof ValidateError);
+    app.once('validationError:schemaQueue', (err) => {
+      const ValidateError = require('../lib/lib/ValidationError');
+      err.should.instanceof(ValidateError);
       err.channel.ack(err.content);
       done();
     });
