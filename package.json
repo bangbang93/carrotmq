@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/bangbang93/carrotmq.pgit"
+    "url": "git+ssh://git@github.com/bangbang93/carrotmq.git"
   },
   "keywords": [
     "rabbitmq"
