@@ -130,9 +130,9 @@ describe('carrotmq', function () {
         done();
     })
   });
-  it('schema validate failed in sendToQueue', async function () {
+  it('schema validate failed in sendToQueue', function () {
     try {
-      await app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
+      return app.sendToQueue('schemaQueue', {time: new Date().toJSON()});
     } catch (e) {
       const SchemaValidationError = require('rabbitmq-schema/lib/schema-validation-error');
       if (e instanceof SchemaValidationError){
