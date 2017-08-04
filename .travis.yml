@@ -5,7 +5,8 @@ before_script:
 node_js:
   - "6"
   - "node"
-sudo: required
+sudo: false
+dist: trusty
 services:
   - rabbitmq
 env:
