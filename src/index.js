@@ -28,6 +28,8 @@ class carrotmq extends EventEmitter {
     const that = this;
     let connection  = await amqplib.connect(that.uri);
     that.connection = connection;
+    connection.on('close', onclose.bind(this));
+    connection.on('error', this.emit.bind(this, 'error'));
     let channel     = await connection.createChannel();
     if (!this.schema) {
       that.ready = true;
@@ -288,6 +290,7 @@ class carrotmq extends EventEmitter {
   }
 
   close() {
+    if (!this.connection) return;
     return this.connection.close();
   }
 }
@@ -308,4 +311,9 @@ function makeContent(content){
   } else {
     return content;
   }
+}
+
+function onclose (arg) {
+  this.connection = null;
+  this.emit('close', arg);
 }

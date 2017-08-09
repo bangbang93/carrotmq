@@ -158,6 +158,12 @@ mq.on('message', function (data){
 })
 ```
 
+### close
+emit when connection close
+```js
+mq.on('close', () => setTimeout(mq.connect(), 1000));
+```
+
 ## upgrade
 ### V2 to V3
 #### breaking change
