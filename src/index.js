@@ -27,15 +27,14 @@ class carrotmq extends EventEmitter {
   }
 
   async connect(){
-    const that = this;
-    let connection  = await amqplib.connect(that.uri);
-    that.connection = connection;
+    let connection  = await amqplib.connect(this.uri);
+    this.connection = connection;
     connection.on('close', onclose.bind(this));
     connection.on('error', this.emit.bind(this, 'error'));
     let channel     = await connection.createChannel();
     if (!this.schema) {
-      that.ready = true;
-      that.emit('ready');
+      this.ready = true;
+      this.emit('ready');
       return;
     }
     let exchanges = this.schema.getExchanges();
@@ -55,8 +54,9 @@ class carrotmq extends EventEmitter {
         }
       }
     }
-    that.ready = true;
-    that.emit('ready');
+    this.ready = true;
+    this._manualClose = false;
+    this.emit('ready');
   }
 
   async queue(queue, consumer, rpcQueue, opts) {
@@ -289,6 +289,7 @@ class carrotmq extends EventEmitter {
 
   close() {
     if (!this.connection) return;
+    this._manualClose = true;
     return this.connection.close();
   }
 }
