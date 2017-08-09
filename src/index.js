@@ -22,6 +22,8 @@ class carrotmq extends EventEmitter {
     this.connect().catch((err) => {
       this.emit(err);
     });
+    this.on('message', noop);
+    this.on('ready', noop);
   }
 
   async connect(){
@@ -34,8 +36,6 @@ class carrotmq extends EventEmitter {
     if (!this.schema) {
       that.ready = true;
       that.emit('ready');
-      that.on('message', noop);
-      that.on('ready', noop);
       return;
     }
     let exchanges = this.schema.getExchanges();
@@ -57,8 +57,6 @@ class carrotmq extends EventEmitter {
     }
     that.ready = true;
     that.emit('ready');
-    that.on('message', noop);
-    that.on('ready', noop);
   }
 
   async queue(queue, consumer, rpcQueue, opts) {
@@ -315,5 +313,6 @@ function makeContent(content){
 
 function onclose (arg) {
   this.connection = null;
+  this.ready = false;
   this.emit('close', arg);
 }
