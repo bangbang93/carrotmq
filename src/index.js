@@ -106,17 +106,17 @@ class carrotmq extends EventEmitter {
         options = Object.assign(message.properties, options);
         that.sendToQueue(replyTo, msg, options)
       };
-      ctx.ack = function () {
+      ctx.ack = function (allUpTo) {
         ctx._isAcked = true;
-        return channel.ack(message);
+        return channel.ack(message, allUpTo);
       };
-      ctx.nack = function () {
+      ctx.nack = function (allUpTo, requeue) {
         ctx._isAcked = true;
-        return channel.nack(message);
+        return channel.nack(message, allUpTo, requeue);
       };
-      ctx.reject = function () {
+      ctx.reject = function (requeue) {
         ctx._isAcked = true;
-        return channel.reject(message);
+        return channel.reject(message, requeue);
       };
       ctx.cancel = function () {
         ctx._isAcked = true;
