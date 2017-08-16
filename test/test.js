@@ -70,6 +70,7 @@ after(function () {
 });
 
 describe('carrotmq', function () {
+  this.timeout(5000);
   it('publish and subscribe', function (done) {
     app.queue('fooExchangeQueue', function (message) {
       this.ack();
