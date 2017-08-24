@@ -75,8 +75,8 @@ class carrotmq extends EventEmitter {
    * attach a consumer on the queue
    * @param {string} queue queue name
    * @param {function} consumer consumer function
-   * @param {boolean} rpcQueue is queue for rpc
-   * @param {object} opts see amqplib#assetQueue
+   * @param {boolean} [rpcQueue=false] is queue for rpc
+   * @param {object} [opts] see amqplib#assetQueue
    * @returns {Promise.<{ticket, queue, consumerTag, noLocal, noAck, exclusive, nowait, arguments}>}
    */
   async queue(queue, consumer, rpcQueue, opts) {
