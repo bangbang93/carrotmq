@@ -286,7 +286,7 @@ class carrotmq extends EventEmitter {
    * rpc call,reply using temp queue
    * @param {string} queue - queue name
    * @param {object|string|buffer} content
-   * @returns {Promise.<void>}
+   * @returns {Promise.<{data, ack, nack, reject, cancel}>}
    */
   async rpc(queue, content) {
     let that = this;
