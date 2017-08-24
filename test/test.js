@@ -117,19 +117,18 @@ describe('carrotmq', function () {
         }
       })
   });
-  it('rpc error', function (done) {
+  it('rpc error', function () {
     app.queue('rpcQueue', function (data) {
       this.reply({err: 'error message'});
       this.ack();
     });
     let time = new Date();
-    app.rpc('rpcQueue', {time})
+    return app.rpc('rpcQueue', {time})
       .then((reply)=>{
         reply.ack();
         const data = reply.data;
         const err = data.err;
-        Assert(err === 'error message');
-        done();
+        err.should.eql('error message')
     })
   });
   it('schema validate failed in sendToQueue', function () {
