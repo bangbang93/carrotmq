@@ -72,11 +72,11 @@ after(function () {
 describe('carrotmq', function () {
   this.timeout(5000);
   it('publish and subscribe', async function (done) {
-    await app.queue('fooExchangeQueue', function () {
+    app.queue('fooExchangeQueue', function () {
       this.ack();
       done();
-    });
-    await app.publish('exchange0', 'foo.bar.key', {time: new Date});
+    }).catch(done)
+    app.publish('exchange0', 'foo.bar.key', {time: new Date}).catch(done)
   });
   it('should reject wrong schema', function (done) {
     let app;
@@ -124,8 +124,9 @@ describe('carrotmq', function () {
     });
     let time = new Date();
     const reply = await app.rpc('rpcQueue', {time})
-    console.log(reply)
-    reply.err.should.eql('error message');
+    console.log(reply.data)
+    reply.data.err.should.eql('error message')
+    reply.ack()
   });
   it('schema validate failed in sendToQueue', function () {
       return app.sendToQueue('schemaQueue', {time: new Date().toJSON()})
