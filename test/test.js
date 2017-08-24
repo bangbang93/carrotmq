@@ -71,12 +71,12 @@ after(function () {
 
 describe('carrotmq', function () {
   this.timeout(5000);
-  it('publish and subscribe', function (done) {
-    app.queue('fooExchangeQueue', function (message) {
+  it('publish and subscribe', async function (done) {
+    await app.queue('fooExchangeQueue', function () {
       this.ack();
       done();
     });
-    app.publish('exchange0', 'foo.bar.key', {time: new Date});
+    await app.publish('exchange0', 'foo.bar.key', {time: new Date});
   });
   it('should reject wrong schema', function (done) {
     let app;
@@ -118,7 +118,7 @@ describe('carrotmq', function () {
       })
   });
   it('rpc error', async function () {
-    app.queue('rpcQueue', function (data) {
+    await app.queue('rpcQueue', function () {
       this.reply({err: 'error message'});
       this.ack();
     });
