@@ -286,7 +286,7 @@ class carrotmq extends EventEmitter {
    * rpc call,reply using temp queue
    * @param {string} queue - queue name
    * @param {object|string|buffer} content
-   * @returns {Promise.<{data, ack, nack, reject, cancel}>}
+   * @returns {Promise.<{data, ack}>}
    */
   async rpc(queue, content) {
     let that = this;
@@ -308,16 +308,16 @@ class carrotmq extends EventEmitter {
     let ctx;
     return new Promise(function (resolve) {
       that.queue(replyQueue.queue, function (data) {
-        ctx = this;
+        ctx = {};
         this.cancel();
-        this.data = data;
+        ctx.data = data;
         const _ack = this.ack;
-        this.ack = function () {
+        ctx.ack = function () {
           if (this._acked) return;
           this._acked = true;
           return _ack.call(this);
         };
-        return resolve(this);
+        return resolve(ctx);
       })
     })
       .finally(() => {
