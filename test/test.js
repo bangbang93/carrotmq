@@ -99,11 +99,11 @@ describe('carrotmq', function () {
     })
   });
   it('rpc', function (done) {
-    app.queue('rpcQueue', function (data) {
+    app.queue('rpcQueue', async function (data) {
+      await this.cancel();
       console.log(data);
-      this.reply(data);
-      this.ack();
-      this.cancel();
+      await this.ack();
+      await this.reply(data);
     });
     let time = new Date();
     app.rpc('rpcQueue', {time})
