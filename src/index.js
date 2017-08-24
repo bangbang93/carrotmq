@@ -8,10 +8,18 @@ const EventEmitter   = require('events').EventEmitter;
 const ValidationError  = require('./lib/ValidationError');
 const Promise = require('bluebird');
 
-const noop = () => {
-};
+const noop = () => {};
 
+/**
+ * CarrotMQ
+ * @extends EventEmitter
+ */
 class carrotmq extends EventEmitter {
+  /**
+   * constructor
+   * @param {string} uri amqp url
+   * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
+   */
   constructor(uri, schema) {
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema');
@@ -26,6 +34,10 @@ class carrotmq extends EventEmitter {
     this.on('ready', noop);
   }
 
+  /**
+   * connect to rabbitmq, auto call when construct,or can be called manually when need reconnect
+   * @returns {Promise.<void>}
+   */
   async connect(){
     let connection  = await amqplib.connect(this.uri);
     this.connection = connection;
@@ -59,6 +71,14 @@ class carrotmq extends EventEmitter {
     this.emit('ready');
   }
 
+  /**
+   * attach a consumer on the queue
+   * @param {string} queue queue name
+   * @param {function} consumer consumer function
+   * @param {boolean} rpcQueue is queue for rpc
+   * @param {object} opts see amqplib#assetQueue
+   * @returns {Promise.<{ticket, queue, consumerTag, noLocal, noAck, exclusive, nowait, arguments}>}
+   */
   async queue(queue, consumer, rpcQueue, opts) {
     let that = this;
     if (!that.ready){
@@ -160,6 +180,13 @@ class carrotmq extends EventEmitter {
     })
   }
 
+  /**
+   * send message to the queue
+   * @param {string} queue - queue name
+   * @param {object|string|buffer} message - object=>JSON.stringify string=>Buffer.from
+   * @param {object} [options] - see amqplib#assetQueue
+   * @returns {Promise.<void>}
+   */
   async sendToQueue(queue, message, options) {
     let that = this;
     if (!that.ready){
@@ -181,6 +208,14 @@ class carrotmq extends EventEmitter {
     channel.close();
   }
 
+  /**
+   * publish into the exchange
+   * @param {string} exchange - exchange name
+   * @param {string} routingKey - routingKey
+   * @param {object|string|buffer} content
+   * @param {object} [options] - see amqplib#publish
+   * @returns {Promise.<void>}
+   */
   async publish(exchange, routingKey, content, options) {
     let that = this;
     if (!that.ready){
@@ -197,6 +232,14 @@ class carrotmq extends EventEmitter {
     channel.close();
   }
 
+  /**
+   * rpc over exchange
+   * @param {string} exchange - exchange name
+   * @param {string} routingKey - routing key
+   * @param {object|string|buffer} content
+   * @param {object} [options] - see amqplib#publish
+   * @returns {Promise.<void>}
+   */
   async rpcExchange(exchange, routingKey, content, options) {
     let that = this;
     if (!that.ready){
@@ -239,11 +282,17 @@ class carrotmq extends EventEmitter {
       });
   }
 
-  async rpc(queue, content, options) {
+  /**
+   * rpc call,reply using temp queue
+   * @param {string} queue - queue name
+   * @param {object|string|buffer} content
+   * @returns {Promise.<void>}
+   */
+  async rpc(queue, content) {
     let that = this;
     if (!that.ready){
       return new Promise(function (resolve) {
-        that.on('ready', ()=>that.rpc(queue, content, options).then(resolve))
+        that.on('ready', ()=>that.rpc(queue, content).then(resolve))
       })
     }
     if (this.schema && this.schema.getQueueByName(queue)) {
@@ -277,6 +326,10 @@ class carrotmq extends EventEmitter {
       });
   }
 
+  /**
+   * get raw amqplib channel
+   * @returns {Promise.<Channel>}
+   */
   createChannel() {
     let that = this;
     if (!that.ready){
@@ -287,6 +340,9 @@ class carrotmq extends EventEmitter {
     return this.connection.createChannel();
   }
 
+  /**
+   * close connection
+   */
   close() {
     if (!this.connection) return;
     this._manualClose = true;

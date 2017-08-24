@@ -1,0 +1,10 @@
+{
+  "plugins": ["node_modules/jsdoc-babel"],
+  "babel": {
+    "presets": [["env", {
+      "targets": {
+        "node": [6]
+      }
+    }]]
+  }
+}

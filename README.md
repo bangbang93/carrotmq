@@ -9,6 +9,10 @@ a much easy way to use rabbitmq
 [![Dependencies](https://img.shields.io/david/bangbang93/carrotmq.svg?style=flat-square)](https://david-dm.org/bangbang93/carrotmq)
 [![NPM](https://nodei.co/npm/carrotmq.png?downloads=true&downloadRank=true)](https://nodei.co/npm/carrotmq/)
 
+## APIDOC
+
+[API.md](API.md)
+
 ## usage
 ```javascript
 const carrotmq = require('carrotmq');

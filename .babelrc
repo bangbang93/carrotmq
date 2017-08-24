@@ -8,6 +8,5 @@
   ],
   "plugins": ["transform-runtime", ["transform-builtin-extend", {
     "globals": ["Error"]
-  }]],
-  "comments": false
+  }]]
 }
