@@ -5,7 +5,7 @@
 const carrotmq       = require('../lib/index');
 const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
-const ValidateError  = require('../lib/lib/ValidationError');
+const ValidateError  = carrotmq.ValidationError;
 require('should');
 
 const schema = new rabbitmqSchema({
