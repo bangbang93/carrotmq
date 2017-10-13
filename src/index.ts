@@ -386,7 +386,7 @@ export class CarrotMQ extends EventEmitter {
     return this.connection.close()
   }
 
-  public static schema = rabbitmqSchema
+  public static schema: rabbitmqSchema = rabbitmqSchema
   public static ValidationError = ValidationError
   public static validationError = ValidationError
 }
