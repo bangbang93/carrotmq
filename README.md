@@ -93,7 +93,7 @@ mq.queue('fooQueue', function(data) {
   console.log(data);
 });
 mq.on('validationError:fooQueue', function(err) {
-  const ValidateError = require('carrotmq/lib/ValidateError');
+  const ValidateError = require(ValidationError);
   err instanceof ValidateError === true;
   console.error(err);
   err.channel.ack(err.content);
