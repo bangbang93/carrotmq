@@ -1,6 +1,6 @@
 {
   "name": "carrotmq",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "easy way to use rabbitmq",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
@@ -27,15 +27,15 @@
   },
   "homepage": "https://github.com/bangbang93/carrotmq#readme",
   "dependencies": {
+    "@types/amqplib": "^0.5.4",
+    "@types/bluebird": "^3.5.16",
+    "@types/node": "^8.0.34",
     "amqplib": "^0.5.1",
     "bluebird": "^3.5.0",
     "bunyan": "^1.7.1",
     "rabbitmq-schema": "^1.1.1"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.5.4",
-    "@types/bluebird": "^3.5.16",
-    "@types/node": "^8.0.34",
     "babel-core": "^6.26.0",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
