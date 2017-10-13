@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha test/index.js",
-    "build": "babel src --out-dir lib",
+    "build": "tsc",
     "prepublish": "npm run build",
     "jsdoc": "jsdoc2md -c .jsdoc.json src/index.js | tee API.md"
   },
@@ -27,7 +27,6 @@
   "homepage": "https://github.com/bangbang93/carrotmq#readme",
   "dependencies": {
     "amqplib": "^0.5.1",
-    "babel-runtime": "^6.25.0",
     "bluebird": "^3.5.0",
     "bunyan": "^1.7.1",
     "rabbitmq-schema": "^1.1.1"
@@ -36,11 +35,7 @@
     "@types/amqplib": "^0.5.4",
     "@types/bluebird": "^3.5.16",
     "@types/node": "^8.0.34",
-    "babel-cli": "^6.24.1",
-    "babel-plugin-transform-builtin-extend": "^1.1.2",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.0",
-    "babel-register": "^6.24.1",
+    "babel-core": "^6.26.0",
     "jsdoc-babel": "^0.3.0",
     "jsdoc-to-markdown": "^3.0.0",
     "mocha": "^3.2.0",
