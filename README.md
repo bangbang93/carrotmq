@@ -15,9 +15,9 @@ a much easy way to use rabbitmq
 
 ## usage
 ```javascript
-const carrotmq = require('carrotmq');
+const {CarrotMQ} = require('carrotmq');
 //var rabbitmqSchema = require('rabbitmq-schema');
-const rabbitmqSchema = carrotmq.schema;
+const rabbitmqSchema = CarrotMQ.schema;
 
 //see https://www.npmjs.com/package/rabbitmq-schema
 const schema = new rabbitmqSchema({
@@ -31,9 +31,9 @@ const schema = new rabbitmqSchema({
       }
     }]
 });
-const mq = new carrotmq('amqp://localhost', schema);
+const mq = new CarrotMQ('amqp://localhost', schema);
 
-const publisher = new carrotmq('amqp://localhost'); //also can use without schema
+const publisher = new CarrotMQ('amqp://localhost'); //also can use without schema
 
 mq.queue('fooQueue', function (data){
     console.log(data);
@@ -88,7 +88,7 @@ const schema = new rabbitmqSchema({
       }
     }]
 });
-const mq = new carrotmq('amqp://localhost', schema);
+const mq = new CarrotMQ('amqp://localhost', schema);
 mq.queue('fooQueue', function(data) {
   console.log(data);
 });
@@ -169,6 +169,17 @@ mq.on('close', () => setTimeout(mq.connect(), 1000));
 ```
 
 ## upgrade
+### V4 to V5
+
+Because of rewritten in TypeScript, some export has changed
+before:
+```javascript
+const CarrotMQ = require('carrotmq')
+```
+after:
+```javascript
+const {CarrotMQ} = require('carrotmq')
+```
 ### V2 to V3
 #### breaking change
   - mq.rpc() and mq.rpcExchange() method remove the 4th consumer argument.And using Promise
