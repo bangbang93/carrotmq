@@ -10,6 +10,10 @@ const Promise = require('bluebird');
 
 const noop = () => {};
 
+const defaultConfig = {
+  rpcTimeout: 30e3
+}
+
 /**
  * CarrotMQ
  * @extends EventEmitter
@@ -19,14 +23,16 @@ class carrotmq extends EventEmitter {
    * constructor
    * @param {string} uri amqp url
    * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
+   * @param {object} config config
    */
-  constructor(uri, schema) {
+  constructor(uri, schema, config) {
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema');
     }
     super();
     this.uri    = uri;
     this.schema = schema;
+    this.config = Object.assign(defaultConfig, config)
     this.connect().catch((err) => {
       this.emit(err);
     });
@@ -276,6 +282,7 @@ class carrotmq extends EventEmitter {
         return resolve(this);
       })
     })
+      .timeout(this.config.rpcTimeout, 'rpc timeout')
       .finally(() => {
         ctx && ctx.ack();
         channel.close()
@@ -320,6 +327,7 @@ class carrotmq extends EventEmitter {
         return resolve(ctx);
       })
     })
+      .timeout(this.config.rpcTimeout, 'rpc timeout')
       .finally(() => {
         ctx && ctx.ack();
         channel.close()
