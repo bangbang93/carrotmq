@@ -11,7 +11,7 @@ import {Channel, Connection, Options} from 'amqplib'
 
 const noop = () => {}
 
-interface IConfig {
+export interface IConfig {
   rpcTimeout: number
 }
 
@@ -31,7 +31,7 @@ interface IContent {
   cancel()
 }
 
-const defaultConfig:IConfig = {
+const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
 }
 
@@ -391,7 +391,7 @@ class CarrotMQ extends EventEmitter {
   public static validationError = ValidationError
 }
 
-module.exports = CarrotMQ
+export default CarrotMQ
 
 function makeContent(content){
   if (typeof content === 'object'){
