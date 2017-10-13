@@ -12,7 +12,7 @@ import {Channel, Connection, Options} from 'amqplib'
 const noop = () => {}
 
 export interface IConfig {
-  rpcTimeout: number
+  rpcTimeout?: number
 }
 
 interface IContent {
@@ -53,7 +53,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
    * @param {object} config config
    */
-  constructor(uri, schema, config:IConfig) {
+  constructor(uri, schema, config:IConfig = {}) {
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema')
     }
