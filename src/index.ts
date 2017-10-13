@@ -39,7 +39,7 @@ const defaultConfig: IConfig = {
  * CarrotMQ
  * @extends EventEmitter
  */
-class CarrotMQ extends EventEmitter {
+export class CarrotMQ extends EventEmitter {
   public uri: string
   public schema: rabbitmqSchema
   public config: IConfig

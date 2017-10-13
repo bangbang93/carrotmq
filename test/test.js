@@ -2,7 +2,7 @@
  * Created by bangbang93 on 16-3-2.
  */
 'use strict';
-const carrotmq       = require('../lib/index');
+const carrotmq       = require('../lib/index').CarrotMQ;
 const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
 const ValidateError  = carrotmq.ValidationError;
