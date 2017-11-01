@@ -126,7 +126,7 @@ export class CarrotMQ extends EventEmitter {
         carrotmq: this,
         channel,
         _isAcked: false,
-        reply (msg, options) {
+        reply (msg, options?) {
           let replyTo = ctx.replyTo || message.properties.replyTo
           if (!replyTo){
             throw new Error('empty reply queue')
@@ -134,15 +134,15 @@ export class CarrotMQ extends EventEmitter {
           options = Object.assign(message.properties, options)
           return that.sendToQueue(replyTo, msg, options)
         },
-        ack (allUpTo) {
+        ack (allUpTo?) {
           ctx._isAcked = true
           return channel.ack(message, allUpTo)
         },
-        nack (allUpTo, requeue) {
+        nack (allUpTo?, requeue?) {
           ctx._isAcked = true
           return channel.nack(message, allUpTo, requeue)
         },
-        reject (requeue) {
+        reject (requeue?) {
           ctx._isAcked = true
           return channel.reject(message, requeue)
         },
