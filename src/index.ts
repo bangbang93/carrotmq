@@ -135,18 +135,22 @@ export class CarrotMQ extends EventEmitter {
           return that.sendToQueue(replyTo, msg, options)
         },
         ack (allUpTo?) {
+          if (ctx._isAcked) throw new Error('already acked')
           ctx._isAcked = true
           return channel.ack(message, allUpTo)
         },
         nack (allUpTo?, requeue?) {
+          if (ctx._isAcked) throw new Error('already acked')
           ctx._isAcked = true
           return channel.nack(message, allUpTo, requeue)
         },
         reject (requeue?) {
+          if (ctx._isAcked) throw new Error('already acked')
           ctx._isAcked = true
           return channel.reject(message, requeue)
         },
         cancel () {
+          if (ctx._isAcked) throw new Error('already acked')
           ctx._isAcked = true
           return channel.cancel(message.fields.consumerTag)
           //channel.close();
