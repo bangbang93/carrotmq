@@ -1,4 +1,6 @@
 # carrotmq
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/bangbang93/carrotmq.svg)](https://greenkeeper.io/)
 a much easy way to use rabbitmq
 
 [中文文档](https://blog.bangbang93.com/2016/03/29/carrotmq%e4%b8%ad%e6%96%87%e6%96%87%e6%a1%a3.moe)
