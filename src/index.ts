@@ -150,7 +150,6 @@ export class CarrotMQ extends EventEmitter {
           return channel.reject(message, requeue)
         },
         cancel () {
-          if (ctx._isAcked) throw new Error('already acked')
           return channel.cancel(message.fields.consumerTag)
           //channel.close();
         },
