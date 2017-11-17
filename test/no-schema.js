@@ -16,6 +16,10 @@ before(function (done) {
   app.on('ready', ()=>done());
 });
 
+after(function () {
+  app.close();
+})
+
 let date = new Date();
 
 describe('no schema queue', function () {

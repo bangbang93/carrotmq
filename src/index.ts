@@ -23,7 +23,7 @@ const defaultConfig: IConfig = {
  */
 export class CarrotMQ extends EventEmitter {
   public uri: string
-  public schema: rabbitmqSchema
+  public schema: rabbitmqSchema | null
   public config: IConfig
   public connection: Connection
   public ready: boolean
@@ -33,16 +33,16 @@ export class CarrotMQ extends EventEmitter {
    * constructor
    * @param {string} uri amqp url
    * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
-   * @param {object} config config
+   * @param {object} [config] config
    */
-  constructor(uri, schema, config:IConfig = {}) {
+  constructor(uri, schema?, config:IConfig = defaultConfig) {
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema')
     }
     super()
     this.uri    = uri
     this.schema = schema
-    this.config = Object.assign(defaultConfig, config) as IConfig
+    this.config = Object.assign(defaultConfig, config)
     this.connect().catch((err) => {
       this.emit(err)
     })
