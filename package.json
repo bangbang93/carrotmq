@@ -42,7 +42,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-register": "latest",
     "jsdoc-babel": "^0.3.0",
-    "jsdoc-to-markdown": "^3.0.0",
+    "jsdoc-to-markdown": "^4.0.0",
     "mocha": "^4.0.1",
     "should": "^13.1.3",
     "typescript": "^2.6.1"
