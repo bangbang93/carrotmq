@@ -10,7 +10,7 @@ export interface IRPCResult{
   ack()
 }
 
-export interface IContent {
+export interface IContext {
   message: any,
   fields: object,
   properties: object,
@@ -25,3 +25,9 @@ export interface IContent {
   reject(requeue?: boolean),
   cancel()
 }
+
+export interface IConsumer {
+  (ctx: IContext):any
+}
+
+export type MessageType = any|string|Buffer

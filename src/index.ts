@@ -2,6 +2,7 @@
  * Created by bangbang93 on 16-3-2.
  */
 
+
 'use strict'
 import * as amqplib from 'amqplib'
 import rabbitmqSchema = require('rabbitmq-schema')
@@ -9,7 +10,7 @@ import {EventEmitter} from 'events'
 import * as Bluebird from 'bluebird'
 import {ValidationError} from './lib/ValidationError'
 import {Channel, Connection} from 'amqplib'
-import {IConfig, IContent, IRPCResult} from './types'
+import {IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
 
 const noop = () => {}
 
@@ -35,7 +36,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
    * @param {object} [config] config
    */
-  constructor(uri, schema?, config:IConfig = defaultConfig) {
+  constructor(uri: string, schema?: rabbitmqSchema, config:IConfig = defaultConfig) {
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema')
     }
@@ -95,7 +96,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [opts] see amqplib#assetQueue
    * @returns {Bluebird.<{ticket, queue, consumerTag, noLocal, noAck, exclusive, nowait, arguments}>}
    */
-  async queue(queue, consumer, rpcQueue = false, opts = null) {
+  async queue(queue: string, consumer:IConsumer, rpcQueue:boolean = false, opts:object = null) {
     let that = this
     if (!that.ready){
       return new Bluebird(function (resolve) {
@@ -117,7 +118,7 @@ export class CarrotMQ extends EventEmitter {
         message,
         channel,
       })
-      const ctx: IContent = {
+      const ctx: IContext = {
         replyTo: null,
         content: null,
         message,
@@ -206,7 +207,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#assetQueue
    * @returns {Bluebird.<void>}
    */
-  async sendToQueue(queue, message, options) {
+  async sendToQueue(queue: string, message: MessageType, options) {
     let that = this
     if (!that.ready){
       return new Bluebird(function (resolve) {
@@ -235,7 +236,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  async publish(exchange, routingKey, content, options = null) {
+  async publish(exchange: string, routingKey: string, content: MessageType, options:object = null) {
     let that = this
     if (!that.ready){
       return new Bluebird(function (resovle) {
@@ -259,7 +260,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  async rpcExchange(exchange, routingKey, content, options = null):Promise<IRPCResult> {
+  async rpcExchange(exchange: string, routingKey: string, content: MessageType, options: object = null):Promise<IRPCResult> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -313,7 +314,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object|string|buffer} content
    * @returns {Bluebird.<{data, ack}>}
    */
-  async rpc(queue, content):Promise<IRPCResult> {
+  async rpc(queue: string, content: MessageType):Promise<IRPCResult> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
