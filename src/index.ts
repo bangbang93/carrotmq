@@ -108,9 +108,9 @@ export class CarrotMQ extends EventEmitter {
       rpcQueue = false
     }
     const channel = await this.connection.createChannel()
-    if ((!queue.startsWith('amq.') && this.schema && !this.schema.getQueueByName(queue))
-      || !this.schema) {
-      channel.assertQueue(queue, opts)
+    if (!queue.startsWith('amq.')
+      && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))) {
+      await channel.assertQueue(queue, opts)
     }
     return channel.consume(queue, (message)=>{
       this.emit('message', {
