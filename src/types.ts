@@ -5,7 +5,7 @@ export interface IConfig {
   rpcTimeout?: number
 }
 
-export interface IRPCResult{
+export interface IRPCResult {
   data: any,
   ack()
 }
@@ -27,7 +27,7 @@ export interface IContext {
 }
 
 export interface IConsumer {
-  (ctx: IContext):any
+  (this: IContext, data: any, ctx: IContext):any
 }
 
 export type MessageType = any|string|Buffer

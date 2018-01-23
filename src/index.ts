@@ -180,7 +180,7 @@ export class CarrotMQ extends EventEmitter {
       }
 
       try {
-        let result = consumer.call(ctx, ctx.content)
+        let result = consumer.call(ctx, ctx.content, ctx)
         if (result && typeof result === 'object' && typeof result.catch === 'function'){
           result.catch((err)=>{
             if (!ctx._isAcked) {
@@ -294,7 +294,7 @@ export class CarrotMQ extends EventEmitter {
             return _ack.call(this)
           }
         }
-        return resolve(this)
+        return resolve(ctx)
       })
     })
       .timeout(this.config.rpcTimeout, 'rpc timeout')
