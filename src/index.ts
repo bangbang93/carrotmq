@@ -358,11 +358,10 @@ export class CarrotMQ extends EventEmitter {
    * get raw amqplib channel
    * @returns {Bluebird.<Channel>}
    */
-  createChannel() {
-    let that = this
-    if (!that.ready){
-      return new Bluebird(function (resolve) {
-        that.on('ready', ()=>that.createChannel().then(resolve))
+  async createChannel() {
+    if (!this.ready){
+      await new Bluebird((resolve) => {
+        this.on('ready', resolve)
       })
     }
     return this.connection.createChannel()
