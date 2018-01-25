@@ -55,7 +55,7 @@ export class CarrotMQ extends EventEmitter {
    * connect to rabbitmq, auto call when construct,or can be called manually when need reconnect
    * @returns {Bluebird.<void>}
    */
-  async connect(){
+  async connect(): Promise<Connection>{
     let connection  = await amqplib.connect(this.uri)
     this.connection = connection
     connection.on('close', onclose.bind(this))
@@ -86,6 +86,7 @@ export class CarrotMQ extends EventEmitter {
     this.ready = true
     this._manualClose = false
     this.emit('ready')
+    return connection
   }
 
   /**
@@ -99,8 +100,8 @@ export class CarrotMQ extends EventEmitter {
   async queue(queue: string, consumer:IConsumer, rpcQueue:boolean = false, opts:object = null) {
     let that = this
     if (!that.ready){
-      return new Bluebird(function (resolve) {
-        that.on('ready', ()=>that.queue(queue, consumer, rpcQueue, opts).then(resolve))
+      await new Bluebird(function (resolve) {
+        that.on('ready', resolve)
       })
     }
     if (!opts && typeof rpcQueue === 'object'){
@@ -112,7 +113,7 @@ export class CarrotMQ extends EventEmitter {
       && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))) {
       await channel.assertQueue(queue, opts)
     }
-    return channel.consume(queue, (message)=>{
+    const {consumerTag} = await  channel.consume(queue, (message)=>{
       this.emit('message', {
         queue,
         message,
@@ -198,6 +199,7 @@ export class CarrotMQ extends EventEmitter {
         that.emit('error', e)
       }
     })
+    return {consumerTag, channel}
   }
 
   /**
@@ -210,8 +212,8 @@ export class CarrotMQ extends EventEmitter {
   async sendToQueue(queue: string, message: MessageType, options) {
     let that = this
     if (!that.ready){
-      return new Bluebird(function (resolve) {
-        that.on('ready', ()=>that.sendToQueue(queue, message, options).then(resolve))
+      await new Bluebird(function (resolve) {
+        that.on('ready', resolve)
       })
     }
     const skipValidate = options ? options.skipValidate : false
@@ -239,8 +241,8 @@ export class CarrotMQ extends EventEmitter {
   async publish(exchange: string, routingKey: string, content: MessageType, options:object = null) {
     let that = this
     if (!that.ready){
-      return new Bluebird(function (resovle) {
-        that.on('ready', ()=>that.publish(exchange, routingKey, content, options).then(resovle))
+      await new Bluebird(function (resolve) {
+        that.on('ready', resolve)
       })
     }
     if (this.schema && this.schema.getExchangeByName(exchange)) {
