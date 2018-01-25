@@ -12,8 +12,6 @@ import {ValidationError} from './lib/ValidationError'
 import {Channel, Connection} from 'amqplib'
 import {IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
 
-const noop = () => {}
-
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
 }
@@ -43,12 +41,10 @@ export class CarrotMQ extends EventEmitter {
     super()
     this.uri    = uri
     this.schema = schema
-    this.config = Object.assign(defaultConfig, config)
+    this.config = {...config, ...defaultConfig}
     this.connect().catch((err) => {
-      this.emit(err)
+      this.emit('error', err)
     })
-    this.on('message', noop)
-    this.on('ready', noop)
   }
 
   /**
@@ -59,8 +55,8 @@ export class CarrotMQ extends EventEmitter {
     let connection  = await amqplib.connect(this.uri)
     this.connection = connection
     connection.on('close', onclose.bind(this))
-    connection.on('error', this.emit.bind(this, 'error'))
-    let channel     = await connection.createChannel()
+    connection.on('error', this.emit.bind(this, ['error']))
+    let channel = await connection.createChannel()
     if (!this.schema) {
       this.ready = true
       this.emit('ready')
