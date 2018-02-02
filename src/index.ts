@@ -14,6 +14,7 @@ import {IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
+  callbackQueue: null
 }
 
 /**
@@ -32,7 +33,7 @@ export class CarrotMQ extends EventEmitter {
    * constructor
    * @param {string} uri amqp url
    * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
-   * @param {object} [config] config
+   * @param {IConfig} [config] config
    */
   constructor(uri: string, schema?: rabbitmqSchema, config:IConfig = defaultConfig) {
     if (schema && !(schema instanceof rabbitmqSchema)) {
@@ -41,7 +42,7 @@ export class CarrotMQ extends EventEmitter {
     super()
     this.uri    = uri
     this.schema = schema
-    this.config = {...config, ...defaultConfig}
+    this.config = {...defaultConfig, ...config}
     this.connect().catch((err) => {
       this.emit('error', err)
     })
@@ -78,6 +79,9 @@ export class CarrotMQ extends EventEmitter {
           await channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern)
         }
       }
+    }
+    if (this.config.callbackQueue) {
+      await channel.assertQueue(this.config.callbackQueue.queue, this.config.callbackQueue.options)
     }
     this.ready = true
     this._manualClose = false
@@ -147,7 +151,7 @@ export class CarrotMQ extends EventEmitter {
           ctx._isAcked = true
           return channel.reject(message, requeue)
         },
-        cancel () {
+        async cancel () {
           return channel.cancel(message.fields.consumerTag)
           //channel.close();
         },
@@ -203,9 +207,9 @@ export class CarrotMQ extends EventEmitter {
    * @param {string} queue - queue name
    * @param {object|string|buffer} message - object=>JSON.stringify string=>Buffer.from
    * @param {object} [options] - see amqplib#assetQueue
-   * @returns {Bluebird.<void>}
+   * @returns {Promise.<void>}
    */
-  async sendToQueue(queue: string, message: MessageType, options) {
+  async sendToQueue(queue: string, message: MessageType, options):Promise<void> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -310,9 +314,10 @@ export class CarrotMQ extends EventEmitter {
    * rpc call,reply using temp queue
    * @param {string} queue - queue name
    * @param {object|string|buffer} content
+   * @param {string} [callbackQueue] 回调队列名
    * @returns {Bluebird.<{data, ack}>}
    */
-  async rpc(queue: string, content: MessageType):Promise<IRPCResult> {
+  async rpc(queue: string, content: MessageType, callbackQueue?: string):Promise<IRPCResult> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -324,14 +329,20 @@ export class CarrotMQ extends EventEmitter {
     }
     content = makeContent(content)
     let channel    = await that.connection.createChannel()
-    let replyQueue = await channel.assertQueue('', {
-      autoDelete: true,
-      durable   : false,
-    })
-    await channel.sendToQueue(queue, content, {replyTo: replyQueue.queue})
+    if (!callbackQueue) {
+      if (this.config.callbackQueue) {
+        callbackQueue = this.config.callbackQueue.queue
+      } else {
+        callbackQueue = (await channel.assertQueue('', {
+          autoDelete: true,
+          durable: false,
+        })).queue
+      }
+    }
+    await channel.sendToQueue(queue, content, {replyTo: callbackQueue})
     let ctx:IRPCResult
     return new Bluebird<IRPCResult>(function (resolve) {
-      return that.queue(replyQueue.queue, function (data) {
+      return that.queue(callbackQueue, function (data) {
         this.cancel()
         const _ack = this.ack
         ctx = {

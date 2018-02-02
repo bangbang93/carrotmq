@@ -12,8 +12,12 @@ const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/`;
 let app;
 
 before(function (done) {
-  app = new carrotmq(uri);
-  app.on('ready', ()=>done());
+  app = new carrotmq(uri, null, {
+    callbackQueue: {
+      queue: 'carrotmq.test.callback'
+    }
+  });
+  app.on('ready', async ()=>done);
 });
 
 after(function () {
@@ -34,5 +38,11 @@ describe('no schema queue', function () {
 
     app.sendToQueue('fooQueue', {date});
   });
-
+  it('rpc', async function () {
+    app.queue('carrotmq.test.callback', (data, ctx) => {
+      return ctx.reply(data)
+    })
+    const result = await app.rpc('carrotmq.test.callback', {data: 'aaa'})
+    result.data['data'].should.eql('aaa')
+  })
 });

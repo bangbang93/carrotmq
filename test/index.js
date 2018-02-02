@@ -3,6 +3,7 @@
  */
 'use strict';
 require('babel-register')
+require('ts-node/register')
 
 require('./test')
 require('./no-schema')
