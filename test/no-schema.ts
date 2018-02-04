@@ -47,6 +47,7 @@ describe('no schema queue', function () {
   });
   it('rpc', async function () {
     app.queue('carrotmq.test.callback', (data, ctx) => {
+      ctx.ack()
       return ctx.reply(data)
     })
     const result = await app.rpc('carrotmq.test.callback', {data: 'aaa'})
