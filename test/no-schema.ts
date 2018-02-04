@@ -19,7 +19,7 @@ before('setup without schema', function (done) {
       queue: 'carrotmq.test.callback'
     }
   });
-  app.on('ready', ()=>done);
+  app.on('ready', done);
 });
 
 after(function () {
@@ -29,12 +29,18 @@ after(function () {
 let date = new Date();
 
 describe('no schema queue', function () {
+  this.timeout(5000);
+
   it('queue', function (done) {
-    this.timeout(5000);
     app.queue('fooQueue', function (data) {
-      this.ack();
-      should(Date.parse(data.date)).equal(date.valueOf());
-      done();
+      try {
+        console.log(data)
+        this.ack();
+        Date.parse(data.date).should.equal(date.valueOf());
+        done();
+      } catch (e) {
+        done(e)
+      }
     });
 
     app.sendToQueue('fooQueue', {date});
@@ -44,6 +50,7 @@ describe('no schema queue', function () {
       return ctx.reply(data)
     })
     const result = await app.rpc('carrotmq.test.callback', {data: 'aaa'})
+    await result.ack()
     result.data['data'].should.eql('aaa')
   })
 });
