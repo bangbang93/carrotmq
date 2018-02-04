@@ -1,9 +1,10 @@
 /**
  * Created by bangbang93 on 16-3-30.
  */
+
 'use strict';
-const carrotmq = require('../lib/index').CarrotMQ;
-require('should');
+import CarrotMQ from '../lib/index'
+import * as should from 'should'
 
 const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
 
@@ -12,7 +13,7 @@ const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/`;
 let app;
 
 before(function (done) {
-  app = new carrotmq(uri, null, {
+  app = new CarrotMQ(uri, null, {
     callbackQueue: {
       queue: 'carrotmq.test.callback'
     }
@@ -31,8 +32,7 @@ describe('no schema queue', function () {
     this.timeout(5000);
     app.queue('fooQueue', function (data) {
       this.ack();
-      console.log(data);
-      Date.parse(data.date).should.equal(date.valueOf());
+      should(Date.parse(data.date)).equal(date.valueOf());
       done();
     });
 
