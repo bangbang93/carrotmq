@@ -336,11 +336,16 @@ export class CarrotMQ extends EventEmitter {
         })).queue
       }
     }
-    await channel.sendToQueue(queue, content, {replyTo: callbackQueue})
+    const correlationId = Math.random().toString(16).substr(2)
+    await channel.sendToQueue(queue, content, {
+      replyTo: callbackQueue,
+      correlationId,
+    })
     let ctx:IRPCResult
     return new Bluebird<IRPCResult>(function (resolve) {
       return that.queue(callbackQueue, function (data) {
-        this.cancel()
+        if (callbackQueue.startsWith('amq.')) this.cancel()
+        if (this.properties.correlationId !== correlationId) return this.reject(true)
         const _ack = this.ack
         ctx = {
           data,
@@ -356,7 +361,7 @@ export class CarrotMQ extends EventEmitter {
       .timeout(this.config.rpcTimeout, 'rpc timeout')
       .finally(() => {
         ctx && ctx.ack()
-        return channel.close()
+        if (callbackQueue.startsWith('amq.')) return channel.close()
       })
   }
 

@@ -2,9 +2,11 @@
  * Created by bangbang93 on 16-3-30.
  */
 
+
 'use strict';
 import CarrotMQ from '../lib/index'
 import * as should from 'should'
+import * as Bluebird from 'bluebird'
 
 const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
 
@@ -34,7 +36,6 @@ describe('no schema queue', function () {
   it('queue', function (done) {
     app.queue('fooQueue', function (data) {
       try {
-        console.log(data)
         this.ack();
         Date.parse(data.date).should.equal(date.valueOf());
         done();
@@ -45,13 +46,24 @@ describe('no schema queue', function () {
 
     app.sendToQueue('fooQueue', {date});
   });
+
   it('rpc', async function () {
     app.queue('carrotmq.test.callback', (data, ctx) => {
       ctx.ack()
       return ctx.reply(data)
     })
-    const result = await app.rpc('carrotmq.test.callback', {data: 'aaa'})
-    await result.ack()
-    result.data['data'].should.eql('aaa')
+    const arr = []
+    for(let i = 0; i < 10; i++ ){
+      arr[i] = rpc()
+    }
+    await Promise.all(arr)
+
+    async function rpc() {
+      const data = Math.random()
+      await Bluebird.delay(data * 100)
+      const result = await app.rpc('carrotmq.test.callback', {data: data})
+      await result.ack()
+      result.data['data'].should.eql(data)
+    }
   })
 });
