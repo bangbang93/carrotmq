@@ -58,25 +58,22 @@ export class CarrotMQ extends EventEmitter {
     connection.on('close', onclose.bind(this))
     connection.on('error', this.emit.bind(this, ['error']))
     let channel = await connection.createChannel()
-    if (!this.schema) {
-      this.ready = true
-      this.emit('ready')
-      return
-    }
-    let exchanges = this.schema.getExchanges()
-    for(const exchange of exchanges) {
-      await channel.assertExchange(exchange.exchange, exchange.type, exchange.options)
-      let bindings = exchange.getDirectBindings()
-      for(const binding of bindings) {
-        let dest = binding.destination
-        let src  = binding.source
-        if (dest.queue) {
-          await channel.assertQueue(dest.queue, dest.options)
-          await channel.bindQueue(dest.queue, src.exchange, binding.routingPattern)
-        }
-        if (dest.exchange) {
-          await channel.assertExchange(dest.exchange, dest.type, dest.options)
-          await channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern)
+    if (this.schema) {
+      let exchanges = this.schema.getExchanges()
+      for(const exchange of exchanges) {
+        await channel.assertExchange(exchange.exchange, exchange.type, exchange.options)
+        let bindings = exchange.getDirectBindings()
+        for(const binding of bindings) {
+          let dest = binding.destination
+          let src  = binding.source
+          if (dest.queue) {
+            await channel.assertQueue(dest.queue, dest.options)
+            await channel.bindQueue(dest.queue, src.exchange, binding.routingPattern)
+          }
+          if (dest.exchange) {
+            await channel.assertExchange(dest.exchange, dest.type, dest.options)
+            await channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern)
+          }
         }
       }
     }
