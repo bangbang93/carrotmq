@@ -4,7 +4,8 @@ before_script:
  - npm run build
 node_js:
   - "6"
-  - "node"
+  - "8"
+  - "9"
 sudo: false
 dist: trusty
 services:

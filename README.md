@@ -13,7 +13,7 @@ a much easy way to use rabbitmq
 
 ## APIDOC
 
-[API.md](API.md)
+[documentation](https://bangbang93.github.io/carrotmq)
 
 ## usage
 ```javascript
@@ -111,6 +111,18 @@ mq.rpc('queue', {data: new Date})
   reply.ack();
   console.log(reply.data); //some reply result
 });
+```
+If you prefer to use named queue rather than temp queue, you can set in config like 
+```javascript
+const mq = new CarrotMQ('amqp://localhost', null, {
+  callbackQueue: {
+    queue: 'carrotmq.rpc.callback'
+  }
+})
+```
+Or 
+```javascript 
+mq.rpc('carrotmq.rpc', {data: 'foo'}, 'carrotmq.rpc.callback') 
 ```
 
 ## RPC Over Exchange
