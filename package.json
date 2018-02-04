@@ -33,7 +33,6 @@
     "@types/node": "^8.0.47",
     "amqplib": "^0.5.1",
     "bluebird": "^3.5.1",
-    "bunyan": "^1.8.12",
     "rabbitmq-schema": "^1.1.1"
   },
   "devDependencies": {
