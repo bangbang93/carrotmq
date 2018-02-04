@@ -55,7 +55,7 @@ app.on('error', function (err) {
   process.exit(-1);
 });
 
-before(function (done){
+before('setup with schema', function (done){
   this.timeout(5000);
   app.on('ready', function () {
     done();

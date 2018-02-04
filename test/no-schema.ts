@@ -12,13 +12,14 @@ const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/`;
 
 let app;
 
-before(function (done) {
+before('setup without schema', function (done) {
+  this.timeout(5000)
   app = new CarrotMQ(uri, null, {
     callbackQueue: {
       queue: 'carrotmq.test.callback'
     }
   });
-  app.on('ready', async ()=>done);
+  app.on('ready', ()=>done);
 });
 
 after(function () {
