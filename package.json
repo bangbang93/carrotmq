@@ -33,7 +33,7 @@
     "@types/node": "^9.3.0",
     "amqplib": "^0.5.1",
     "bluebird": "^3.5.1",
-    "rabbitmq-schema": "^1.1.1"
+    "rabbitmq-schema": "^2.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
