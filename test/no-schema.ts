@@ -4,7 +4,7 @@
 
 
 'use strict';
-import CarrotMQ from '../lib/index'
+import CarrotMQ from '../src/index'
 import * as should from 'should'
 import * as Bluebird from 'bluebird'
 

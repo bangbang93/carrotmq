@@ -2,7 +2,7 @@
  * Created by bangbang93 on 16-3-2.
  */
 'use strict';
-const carrotmq       = require('../lib/index').CarrotMQ;
+const carrotmq       = require('../src/index').CarrotMQ;
 const rabbitmqSchema = require('rabbitmq-schema');
 const Assert         = require('assert');
 const ValidateError  = carrotmq.ValidationError;
@@ -71,12 +71,14 @@ after(function () {
 
 describe('carrotmq', function () {
   this.timeout(5000);
-  it('publish and subscribe', function (done) {
-    app.queue('fooExchangeQueue', function () {
-      this.ack();
-      done();
-    }).catch(done)
-    app.publish('exchange0', 'foo.bar.key', {time: new Date}).catch(done)
+  it('publish and subscribe', async function () {
+    await new Promise(async (resolve) => {
+      await app.queue('fooExchangeQueue', function () {
+        this.ack();
+        resolve()
+      })
+      await app.publish('exchange0', 'foo.bar.key', {time: new Date})
+    })
   });
   it('should reject wrong schema', function (done) {
     let app;
@@ -113,7 +115,7 @@ describe('carrotmq', function () {
         if (new Date(data.time).valueOf() === time.valueOf()){
           done();
         } else {
-          done(new Error('wrong time',  data.time, time));
+          done(new Error('wrong time'));
         }
       })
   });

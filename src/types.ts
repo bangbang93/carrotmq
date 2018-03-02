@@ -12,7 +12,8 @@ export interface IConfig {
 
 export interface IRPCResult {
   data: any,
-  ack()
+  ack(),
+  _ack: boolean,
 }
 
 export interface IContext {
@@ -36,3 +37,8 @@ export interface IConsumer {
 }
 
 export type MessageType = any|string|Buffer
+
+export interface ICarrotMQMessage {
+  content: MessageType,
+  contentType: string
+}

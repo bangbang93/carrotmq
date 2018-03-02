@@ -5,12 +5,13 @@
 
 'use strict'
 import * as amqplib from 'amqplib'
-import rabbitmqSchema = require('rabbitmq-schema')
 import {EventEmitter} from 'events'
 import * as Bluebird from 'bluebird'
 import {ValidationError} from './lib/ValidationError'
-import {Channel, Connection} from 'amqplib'
-import {IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
+import {Channel, Connection, Options} from 'amqplib'
+import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
+
+import rabbitmqSchema = require('rabbitmq-schema')
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -154,12 +155,17 @@ export class CarrotMQ extends EventEmitter {
         },
       }
       if (rpcQueue) {
-        let content = JSON.parse(message.content.toString())
+        const content = decodeContent({
+          content: message.content.toString(),
+          contentType: message.properties.contentType
+        })
         ctx.replyTo = content.replyTo
-        ctx.content = new Buffer(content.content.data)
-        ctx.content = JSON.parse(ctx.content.toString())
+        ctx.content = content.content
       } else {
-        ctx.content = JSON.parse(message.content.toString())
+        ctx.content = decodeContent({
+          content: message.content.toString(),
+          contentType: message.properties.contentType
+        })
       }
 
       if (this.schema && this.schema.getQueueByName(queue)) {
@@ -206,7 +212,8 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#assetQueue
    * @returns {Promise.<void>}
    */
-  async sendToQueue(queue: string, message: MessageType, options):Promise<void> {
+  async sendToQueue(queue: string, message: MessageType,
+                    options: Options.Publish & {skipValidate?: boolean} = {}): Promise<void> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -221,9 +228,10 @@ export class CarrotMQ extends EventEmitter {
         throw new ValidationError(message, null, queue, e)
       }
     }
-    message = makeContent(message)
+    const {content, contentType} = makeContent(message)
+    options.contentType = contentType
     const channel = await this.connection.createChannel()
-    await channel.sendToQueue(queue, message, options)
+    await channel.sendToQueue(queue, content, options)
     await channel.close()
   }
 
@@ -231,11 +239,11 @@ export class CarrotMQ extends EventEmitter {
    * publish into the exchange
    * @param {string} exchange - exchange name
    * @param {string} routingKey - routingKey
-   * @param {object|string|buffer} content
+   * @param {object|string|buffer} message
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  async publish(exchange: string, routingKey: string, content: MessageType, options:object = null) {
+  async publish(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}) {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -243,9 +251,10 @@ export class CarrotMQ extends EventEmitter {
       })
     }
     if (this.schema && this.schema.getExchangeByName(exchange)) {
-      this.schema.validateMessage(exchange, routingKey, content)
+      this.schema.validateMessage(exchange, routingKey, message)
     }
-    content = makeContent(content)
+    const {content, contentType} = makeContent(message)
+    options.contentType = contentType
     const channel = await this.connection.createChannel()
     await channel.publish(exchange, routingKey, content, options)
     await channel.close()
@@ -255,11 +264,11 @@ export class CarrotMQ extends EventEmitter {
    * rpc over exchange
    * @param {string} exchange - exchange name
    * @param {string} routingKey - routing key
-   * @param {object|string|buffer} content
+   * @param {object|string|buffer} message
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  async rpcExchange(exchange: string, routingKey: string, content: MessageType, options: object = null):Promise<IRPCResult> {
+  async rpcExchange(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}):Promise<IRPCResult> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -267,18 +276,18 @@ export class CarrotMQ extends EventEmitter {
       })
     }
     if (this.schema && this.schema.getExchangeByName(exchange)) {
-      this.schema.validateMessage(exchange, routingKey, content)
+      this.schema.validateMessage(exchange, routingKey, message)
     }
-    content = makeContent(content)
     let channel = await that.connection.createChannel()
     let replyQueue = await channel.assertQueue('', {
       autoDelete: true,
       durable: false,
     })
-    content = makeContent({
-      content,
+    const {content, contentType} = makeContent({
+      content: message,
       replyTo: replyQueue.queue,
     })
+    options.contentType = contentType
     await channel.publish(exchange, routingKey, content, options)
     let ctx:IRPCResult
     return new Bluebird<IRPCResult>(function (resolve, reject) {
@@ -286,6 +295,7 @@ export class CarrotMQ extends EventEmitter {
         this.cancel()
         const _ack = this.ack
         ctx = {
+          _ack: false,
           data,
           ack () {
             if (this._acked) return
@@ -310,11 +320,11 @@ export class CarrotMQ extends EventEmitter {
   /**
    * rpc call,reply using temp queue
    * @param {string} queue - queue name
-   * @param {object|string|buffer} content
+   * @param {object|string|buffer} message
    * @param {string} [callbackQueue] 回调队列名
    * @returns {Bluebird.<{data, ack}>}
    */
-  async rpc(queue: string, content: MessageType, callbackQueue?: string):Promise<IRPCResult> {
+  async rpc(queue: string, message: MessageType, callbackQueue?: string):Promise<IRPCResult> {
     let that = this
     if (!that.ready){
       await new Bluebird(function (resolve) {
@@ -322,9 +332,9 @@ export class CarrotMQ extends EventEmitter {
       })
     }
     if (this.schema && this.schema.getQueueByName(queue)) {
-      this.schema.validateMessage(queue, content)
+      this.schema.validateMessage(queue, message)
     }
-    content = makeContent(content)
+    const {content, contentType} = makeContent(message)
     let channel    = await that.connection.createChannel()
     if (!callbackQueue) {
       if (this.config.callbackQueue) {
@@ -340,28 +350,29 @@ export class CarrotMQ extends EventEmitter {
     await channel.sendToQueue(queue, content, {
       replyTo: callbackQueue,
       correlationId,
+      contentType,
     })
-    let ctx:IRPCResult
+    let rpcResult:IRPCResult
     return new Bluebird<IRPCResult>(function (resolve) {
-      return that.queue(callbackQueue, function (data) {
-        if (callbackQueue.startsWith('amq.')) this.cancel()
-        if (this.properties.correlationId !== correlationId) return this.reject(true)
-        const _ack = this.ack
-        ctx = {
+      return that.queue(callbackQueue, async function (data, ctx) {
+        if (ctx.properties.correlationId !== correlationId) return ctx.reject(true)
+        await ctx.cancel()
+        rpcResult = {
+          _ack: false,
           data,
-          ack () {
-            if (this._acked) return
-            this._acked = true
-            return _ack.call(this)
+          ack: () => {
+            if (rpcResult._ack) return
+            rpcResult._ack = true
+            return this.ack()
           }
         }
-        return resolve(ctx)
+        return resolve(rpcResult)
       })
     })
       .timeout(this.config.rpcTimeout, 'rpc timeout')
       .finally(() => {
-        ctx && ctx.ack()
-        if (callbackQueue.startsWith('amq.')) return channel.close()
+        rpcResult && rpcResult.ack()
+        return channel.close()
       })
   }
 
@@ -394,15 +405,35 @@ export class CarrotMQ extends EventEmitter {
 
 export default CarrotMQ
 
-function makeContent(content){
+function makeContent(content: MessageType): ICarrotMQMessage{
   if (typeof content === 'object'){
-    return new Buffer(JSON.stringify(content), 'utf8')
+    return {
+      content: new Buffer(JSON.stringify(content), 'utf8'),
+      contentType: 'application/json'
+    }
   } else if (typeof content === 'string') {
-    return new Buffer(content, 'utf8')
+    return {
+      content: new Buffer(content, 'utf8'),
+      contentType: 'string'
+    }
   } else if (!Buffer.isBuffer(content)){
     throw new TypeError('unknown message')
   } else {
-    return content
+    return {
+      content,
+      contentType: 'buffer'
+    }
+  }
+}
+
+function decodeContent(content: ICarrotMQMessage): MessageType {
+  switch (content.contentType) {
+    case 'application/json':
+      return JSON.parse(content.content)
+    case 'string':
+    case 'buffer':
+    default:
+      return content.content
   }
 }
 
