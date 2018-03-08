@@ -29,7 +29,7 @@ export class CarrotMQ extends EventEmitter {
   public connection: Connection
   public ready: boolean
 
-  private _manualClose: boolean
+  public manualClose: boolean
   /**
    * constructor
    * @param {string} uri amqp url
@@ -82,7 +82,7 @@ export class CarrotMQ extends EventEmitter {
       await channel.assertQueue(this.config.callbackQueue.queue, this.config.callbackQueue.options)
     }
     this.ready = true
-    this._manualClose = false
+    this.manualClose = false
     this.emit('ready')
     return connection
   }
@@ -326,11 +326,7 @@ export class CarrotMQ extends EventEmitter {
    */
   async rpc(queue: string, message: MessageType, callbackQueue?: string):Promise<IRPCResult> {
     let that = this
-    if (!that.ready){
-      await new Bluebird(function (resolve) {
-        that.on('ready', resolve)
-      })
-    }
+    await this.awaitReady()
     if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, message)
     }
@@ -394,8 +390,16 @@ export class CarrotMQ extends EventEmitter {
    */
   close() {
     if (!this.connection) return
-    this._manualClose = true
+    this.manualClose = true
     return this.connection.close()
+  }
+
+  private async awaitReady() {
+    if(!this.ready) {
+      await new Promise((resolve) => {
+        this.on('ready', resolve)
+      })
+    }
   }
 
   public static schema: rabbitmqSchema = rabbitmqSchema
