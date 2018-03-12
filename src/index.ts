@@ -156,14 +156,14 @@ export class CarrotMQ extends EventEmitter {
       }
       if (rpcQueue) {
         const content = decodeContent({
-          content: message.content.toString(),
+          content: message.content,
           contentType: message.properties.contentType
         })
         ctx.replyTo = content.replyTo
         ctx.content = content.content
       } else {
         ctx.content = decodeContent({
-          content: message.content.toString(),
+          content: message.content,
           contentType: message.properties.contentType
         })
       }
@@ -435,6 +435,7 @@ function decodeContent(content: ICarrotMQMessage): MessageType {
     case 'application/json':
       return JSON.parse(content.content)
     case 'string':
+      return content.content.toString('utf8')
     case 'buffer':
     default:
       return content.content
