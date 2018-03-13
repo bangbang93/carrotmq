@@ -3,6 +3,7 @@
  */
 
 
+
 'use strict'
 import * as amqplib from 'amqplib'
 import {EventEmitter} from 'events'
@@ -12,6 +13,7 @@ import {Channel, Connection, Options} from 'amqplib'
 import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
 
 import rabbitmqSchema = require('rabbitmq-schema')
+import * as os from 'os'
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -28,6 +30,7 @@ export class CarrotMQ extends EventEmitter {
   public config: IConfig
   public connection: Connection
   public ready: boolean
+  public appId: string
 
   public manualClose: boolean
   /**
@@ -44,6 +47,7 @@ export class CarrotMQ extends EventEmitter {
     this.uri    = uri
     this.schema = schema
     this.config = {...defaultConfig, ...config}
+    this.appId = `${os.hostname()}:${process.title}:${process.pid}`
     this.connect().catch((err) => {
       this.emit('error', err)
     })
@@ -131,7 +135,7 @@ export class CarrotMQ extends EventEmitter {
           if (!replyTo){
             throw new Error('empty reply queue')
           }
-          options = Object.assign(message.properties, options)
+          options = Object.assign(message.properties, options, {appId: that.appId})
           return that.sendToQueue(replyTo, msg, options)
         },
         ack (allUpTo?) {
@@ -230,6 +234,7 @@ export class CarrotMQ extends EventEmitter {
     }
     const {content, contentType} = makeContent(message)
     options.contentType = contentType
+    options.appId = this.appId
     const channel = await this.connection.createChannel()
     await channel.sendToQueue(queue, content, options)
     await channel.close()
@@ -255,6 +260,7 @@ export class CarrotMQ extends EventEmitter {
     }
     const {content, contentType} = makeContent(message)
     options.contentType = contentType
+    options.appId = this.appId
     const channel = await this.connection.createChannel()
     await channel.publish(exchange, routingKey, content, options)
     await channel.close()
@@ -288,6 +294,7 @@ export class CarrotMQ extends EventEmitter {
       replyTo: replyQueue.queue,
     })
     options.contentType = contentType
+    options.appId = this.appId
     await channel.publish(exchange, routingKey, content, options)
     let ctx:IRPCResult
     return new Bluebird<IRPCResult>(function (resolve, reject) {
@@ -347,6 +354,7 @@ export class CarrotMQ extends EventEmitter {
       replyTo: callbackQueue,
       correlationId,
       contentType,
+      appId: this.appId,
     })
     let rpcResult:IRPCResult
     return new Bluebird<IRPCResult>(function (resolve) {
