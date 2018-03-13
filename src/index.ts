@@ -419,7 +419,7 @@ export class CarrotMQ extends EventEmitter {
 export default CarrotMQ
 
 function makeContent(content: MessageType): ICarrotMQMessage{
-  if (typeof content === 'object'){
+  if (typeof content === 'object' || typeof content === 'undefined'){
     return {
       content: new Buffer(JSON.stringify(content), 'utf8'),
       contentType: 'application/json'
