@@ -3,13 +3,12 @@
  */
 
 
-
 'use strict'
 import * as amqplib from 'amqplib'
 import {EventEmitter} from 'events'
 import * as Bluebird from 'bluebird'
 import {ValidationError} from './lib/ValidationError'
-import {Channel, Connection, Options} from 'amqplib'
+import {Channel, Connection, Options, Replies} from 'amqplib'
 import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
 
 import rabbitmqSchema = require('rabbitmq-schema')
@@ -115,7 +114,8 @@ export class CarrotMQ extends EventEmitter {
       && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))) {
       await channel.assertQueue(queue, opts)
     }
-    const {consumerTag} = await  channel.consume(queue, (message)=>{
+    let consume: Replies.Consume
+    const reply = channel.consume(queue, (message) => {
       this.emit('message', {
         queue,
         message,
@@ -206,7 +206,8 @@ export class CarrotMQ extends EventEmitter {
         that.emit('error', e)
       }
     })
-    return {consumerTag, channel}
+    consume = await reply
+    return {consumerTag: consume.consumerTag, channel}
   }
 
   /**
