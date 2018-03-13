@@ -154,7 +154,7 @@ export class CarrotMQ extends EventEmitter {
           return channel.reject(message, requeue)
         },
         async cancel () {
-          return channel.cancel(consumerTag)
+          return channel.cancel(consume.consumerTag)
           //channel.close();
         },
       }
