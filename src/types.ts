@@ -29,7 +29,7 @@ export interface IContext {
   ack(allUpTo?: boolean): void,
   nack(allUpTo?: boolean, requeue?: boolean): void,
   reject(requeue?: boolean): void,
-  cancel(): Promise<Replies.Empty>
+  cancel(): Promise<void>
 }
 
 export interface IConsumer {

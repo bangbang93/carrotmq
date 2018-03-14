@@ -96,7 +96,6 @@ export class CarrotMQ extends EventEmitter {
    * @param {function} consumer consumer function
    * @param {boolean} [rpcQueue=false] is queue for rpc
    * @param {object} [opts] see amqplib#assetQueue
-   * @returns {Bluebird.<{ticket, queue, consumerTag, noLocal, noAck, exclusive, nowait, arguments}>}
    */
   async queue(queue: string, consumer:IConsumer, rpcQueue:boolean = false, opts:object = null) {
     let that = this
@@ -154,8 +153,8 @@ export class CarrotMQ extends EventEmitter {
           return channel.reject(message, requeue)
         },
         async cancel () {
-          return channel.cancel(message.fields['consumerTag'])
-          //channel.close();
+          await channel.cancel(message.fields['consumerTag'])
+          await channel.close();
         },
       }
       if (rpcQueue) {
