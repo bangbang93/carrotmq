@@ -360,14 +360,14 @@ export class CarrotMQ extends EventEmitter {
     return new Bluebird<IRPCResult>(function (resolve) {
       return that.queue(callbackQueue, async function (data, ctx) {
         if (ctx.properties.correlationId !== correlationId) return ctx.reject(true)
-        await ctx.cancel()
         rpcResult = {
           _ack: false,
           data,
-          ack: () => {
+          ack: async () => {
             if (rpcResult._ack) return
             rpcResult._ack = true
-            return this.ack()
+            await ctx.ack()
+            await ctx.cancel()
           }
         }
         return resolve(rpcResult)
