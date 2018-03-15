@@ -153,6 +153,7 @@ export class CarrotMQ extends EventEmitter {
           return channel.reject(message, requeue)
         },
         async cancel () {
+          if (!ctx._isAcked) throw new Error('cannot cancel before ack')
           await channel.cancel(message.fields['consumerTag'])
           await channel.close();
         },
