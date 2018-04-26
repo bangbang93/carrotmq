@@ -432,7 +432,7 @@ function makeContent(content: MessageType): ICarrotMQMessage{
       }
     case typeof content === 'undefined':
       return {
-        content: 'undefined',
+        content: new Buffer('undefined'),
         contentType: 'undefined'
       }
     case typeof content === 'object':
