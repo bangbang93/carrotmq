@@ -107,9 +107,10 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_index_.carrotmq.html#_manualclose" class="tsd-kind-icon">_manual<wbr>Close</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#appid" class="tsd-kind-icon">app<wbr>Id</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#config" class="tsd-kind-icon">config</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#connection" class="tsd-kind-icon">connection</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#manualclose" class="tsd-kind-icon">manual<wbr>Close</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#ready" class="tsd-kind-icon">ready</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#schema" class="tsd-kind-icon">schema</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#uri" class="tsd-kind-icon">uri</a></li>
@@ -123,6 +124,7 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="_index_.carrotmq.html#addlistener" class="tsd-kind-icon">add<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_index_.carrotmq.html#awaitready" class="tsd-kind-icon">await<wbr>Ready</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.carrotmq.html#close" class="tsd-kind-icon">close</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.carrotmq.html#connect" class="tsd-kind-icon">connect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.carrotmq.html#createchannel" class="tsd-kind-icon">create<wbr>Channel</a></li>
@@ -162,7 +164,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L32">index.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L34">index.ts:34</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -194,13 +196,13 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="_manualclose" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _manual<wbr>Close</h3>
-					<div class="tsd-signature tsd-kind-icon">_manual<wbr>Close<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="appid" class="tsd-anchor"></a>
+					<h3>app<wbr>Id</h3>
+					<div class="tsd-signature tsd-kind-icon">app<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L32">index.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L32">index.ts:32</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -210,7 +212,7 @@
 					<div class="tsd-signature tsd-kind-icon">config<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_.iconfig.html" class="tsd-signature-type">IConfig</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L28">index.ts:28</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L29">index.ts:29</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -220,7 +222,17 @@
 					<div class="tsd-signature tsd-kind-icon">connection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Connection</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L29">index.ts:29</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L30">index.ts:30</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="manualclose" class="tsd-anchor"></a>
+					<h3>manual<wbr>Close</h3>
+					<div class="tsd-signature tsd-kind-icon">manual<wbr>Close<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L34">index.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -230,7 +242,7 @@
 					<div class="tsd-signature tsd-kind-icon">ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L30">index.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L31">index.ts:31</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -240,7 +252,7 @@
 					<div class="tsd-signature tsd-kind-icon">schema<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">rabbitmqSchema</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L27">index.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L28">index.ts:28</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -250,7 +262,7 @@
 					<div class="tsd-signature tsd-kind-icon">uri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L26">index.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L27">index.ts:27</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -260,7 +272,7 @@
 					<div class="tsd-signature tsd-kind-icon">Validation<wbr>Error<span class="tsd-signature-symbol">:</span> <a href="_lib_validationerror_.validationerror.html" class="tsd-signature-type">ValidationError</a><span class="tsd-signature-symbol"> =&nbsp;ValidationError</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L402">index.ts:402</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L415">index.ts:415</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -281,7 +293,7 @@
 					<div class="tsd-signature tsd-kind-icon">schema<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">rabbitmqSchema</span><span class="tsd-signature-symbol"> =&nbsp;rabbitmqSchema</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L401">index.ts:401</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L414">index.ts:414</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -291,7 +303,7 @@
 					<div class="tsd-signature tsd-kind-icon">validation<wbr>Error<span class="tsd-signature-symbol">:</span> <a href="_lib_validationerror_.validationerror.html" class="tsd-signature-type">ValidationError</a><span class="tsd-signature-symbol"> =&nbsp;ValidationError</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L403">index.ts:403</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L416">index.ts:416</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -344,6 +356,23 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="awaitready" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> await<wbr>Ready</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">await<wbr>Ready<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L406">index.ts:406</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="close" class="tsd-anchor"></a>
 					<h3>close</h3>
@@ -354,7 +383,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L395">index.ts:395</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L400">index.ts:400</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -376,7 +405,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L56">index.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L59">index.ts:59</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -398,7 +427,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L383">index.ts:383</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L388">index.ts:388</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -720,7 +749,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L246">index.ts:246</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L252">index.ts:252</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -763,7 +792,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L98">index.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L100">index.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -793,9 +822,6 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<blockquote>
-								<p>}</p>
-							</blockquote>
 						</li>
 					</ul>
 				</section>
@@ -905,7 +931,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L327">index.ts:327</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L335">index.ts:335</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -945,7 +971,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L271">index.ts:271</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L278">index.ts:278</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -988,7 +1014,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/3bf43e4/src/index.ts#L215">index.ts:215</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/d2096f1/src/index.ts#L220">index.ts:220</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1099,14 +1125,17 @@
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="_index_.carrotmq.html#_manualclose" class="tsd-kind-icon">_manual<wbr>Close</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_index_.carrotmq.html#appid" class="tsd-kind-icon">app<wbr>Id</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#config" class="tsd-kind-icon">config</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#connection" class="tsd-kind-icon">connection</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_index_.carrotmq.html#manualclose" class="tsd-kind-icon">manual<wbr>Close</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#ready" class="tsd-kind-icon">ready</a>
@@ -1131,6 +1160,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="_index_.carrotmq.html#addlistener" class="tsd-kind-icon">add<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_index_.carrotmq.html#awaitready" class="tsd-kind-icon">await<wbr>Ready</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#close" class="tsd-kind-icon">close</a>

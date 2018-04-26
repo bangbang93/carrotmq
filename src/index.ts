@@ -16,7 +16,7 @@ import * as os from 'os'
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
-  callbackQueue: null
+  callbackQueue: null,
 }
 
 /**
@@ -430,7 +430,12 @@ function makeContent(content: MessageType): ICarrotMQMessage{
         content: new Buffer(content, 'utf8'),
         contentType: 'string'
       }
-    case typeof content === 'object' || typeof content === 'undefined':
+    case typeof content === 'undefined':
+      return {
+        content: 'undefined',
+        contentType: 'undefined'
+      }
+    case typeof content === 'object':
       return {
         content: new Buffer(JSON.stringify(content), 'utf8'),
         contentType: 'application/json'
@@ -446,6 +451,8 @@ function decodeContent(content: ICarrotMQMessage): MessageType {
       return JSON.parse(content.content)
     case 'string':
       return content.content.toString('utf8')
+    case 'undefined':
+      return undefined
     case 'buffer':
     default:
       return content.content
