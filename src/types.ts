@@ -36,7 +36,7 @@ export interface IConsumer {
   (this: IContext, data: any, ctx: IContext): any
 }
 
-export type MessageType = any|string|Buffer
+export type MessageType = any|boolean|number|string|Buffer
 
 export interface ICarrotMQMessage {
   content: MessageType,

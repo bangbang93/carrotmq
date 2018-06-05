@@ -428,13 +428,15 @@ function makeContent(content: MessageType): ICarrotMQMessage{
     case typeof content === 'string':
       return {
         content: new Buffer(content, 'utf8'),
-        contentType: 'string'
+        contentType: 'text/plain'
       }
     case typeof content === 'undefined':
       return {
         content: new Buffer('undefined'),
         contentType: 'undefined'
       }
+    case typeof content === 'boolean':
+    case typeof content === 'number':
     case typeof content === 'object':
       return {
         content: new Buffer(JSON.stringify(content), 'utf8'),
@@ -450,6 +452,7 @@ function decodeContent(content: ICarrotMQMessage): MessageType {
     case 'application/json':
       return JSON.parse(content.content)
     case 'string':
+    case 'text/plain':
       return content.content.toString('utf8')
     case 'undefined':
       return undefined
