@@ -358,6 +358,7 @@ export class CarrotMQ extends EventEmitter {
       appId: this.appId,
     })
     let rpcResult:IRPCResult
+    let consumer: {consumerTag: string}
     return new Bluebird<IRPCResult>(function (resolve) {
       return that.queue(callbackQueue, async function (data, ctx) {
         if (ctx.properties.correlationId !== correlationId) return ctx.reject(true)
@@ -373,10 +374,15 @@ export class CarrotMQ extends EventEmitter {
         }
         return resolve(rpcResult)
       })
+        .then((c) => {
+          consumer = c
+          return c
+        })
     })
       .timeout(this.config.rpcTimeout, 'rpc timeout')
-      .finally(() => {
+      .finally(async () => {
         rpcResult && rpcResult.ack()
+        await channel.cancel(consumer.consumerTag)
         return channel.close()
       })
   }
