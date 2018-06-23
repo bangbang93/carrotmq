@@ -380,6 +380,13 @@ export class CarrotMQ extends EventEmitter {
         })
     })
       .timeout(this.config.rpcTimeout, 'rpc timeout')
+      .catch(Bluebird.TimeoutError, (err) => {
+        let e = new Error('rpc timeout')
+        e['cause'] = err
+        e['queue'] = queue
+        e['data'] = message
+        throw e
+    })
       .finally(async () => {
         rpcResult && rpcResult.ack()
         await channel.cancel(consumer.consumerTag)
