@@ -388,8 +388,11 @@ export class CarrotMQ extends EventEmitter {
         throw e
     })
       .finally(async () => {
-        rpcResult && rpcResult.ack()
-        await channel.cancel(consumer.consumerTag)
+        if (rpcResult) {
+          await rpcResult.ack()
+        } else {
+          await channel.cancel(consumer.consumerTag)
+        }
         return channel.close()
       })
   }
