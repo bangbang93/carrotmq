@@ -18,7 +18,9 @@
     "url": "git+ssh://git@github.com/bangbang93/carrotmq.git"
   },
   "keywords": [
-    "rabbitmq"
+    "rabbitmq",
+    "amqp",
+    "amqplib"
   ],
   "author": "bangbang93",
   "license": "GPL-3.0",
@@ -36,15 +38,10 @@
     "rabbitmq-schema": "^2.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-plugin-transform-builtin-extend": "^1.1.2",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-register": "latest",
     "mocha": "^5.0.5",
     "should": "^13.2.1",
     "ts-node": "^6.0.5",
     "typedoc": "^0.11.1",
-    "typescript": "^2.6.1"
+    "typescript": "^2.9.2"
   }
 }
