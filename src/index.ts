@@ -46,7 +46,6 @@ export class CarrotMQ extends EventEmitter {
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema')
     }
-    super()
     this.uri    = uri
     this.schema = schema
     this.config = {...defaultConfig, ...config}
