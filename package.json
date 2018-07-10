@@ -11,7 +11,7 @@
     "test": "mocha test/index.js",
     "build": "tsc",
     "prepublishOnly": "npm run build && npm run doc",
-    "doc": "typedoc --out docs src && docs/.nojekyll"
+    "doc": "typedoc --out docs src && touch docs/.nojekyll"
   },
   "repository": {
     "type": "git",
