@@ -64,7 +64,7 @@ export class CarrotMQ extends EventEmitter {
     this.connection = connection
     connection.on('close', onclose.bind(this))
     connection.on('error', this.emit.bind(this, ['error']))
-    let channel = await this.createChannel()
+    let channel = await connection.createChannel()
     if (this.schema) {
       let exchanges = this.schema.getExchanges()
       for(const exchange of exchanges) {
