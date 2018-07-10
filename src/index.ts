@@ -32,6 +32,9 @@ export class CarrotMQ extends EventEmitter {
   public appId: string
 
   public manualClose: boolean
+
+  private isFirstConnection: boolean = true
+  private readyPromise: Promise<void>
   /**
    * constructor
    * @param {string} uri amqp url
@@ -39,6 +42,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {IConfig} [config] config
    */
   constructor(uri: string, schema?: rabbitmqSchema, config:IConfig = defaultConfig) {
+    super()
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema')
     }
@@ -61,7 +65,7 @@ export class CarrotMQ extends EventEmitter {
     this.connection = connection
     connection.on('close', onclose.bind(this))
     connection.on('error', this.emit.bind(this, ['error']))
-    let channel = await connection.createChannel()
+    let channel = await this.createChannel()
     if (this.schema) {
       let exchanges = this.schema.getExchanges()
       for(const exchange of exchanges) {
@@ -87,6 +91,7 @@ export class CarrotMQ extends EventEmitter {
     this.ready = true
     this.manualClose = false
     this.emit('ready')
+    this.isFirstConnection = false
     return connection
   }
 
@@ -108,7 +113,7 @@ export class CarrotMQ extends EventEmitter {
       opts = rpcQueue
       rpcQueue = false
     }
-    const channel = await this.connection.createChannel()
+    const channel = await this.createChannel()
     if (!queue.startsWith('amq.')
       && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))) {
       await channel.assertQueue(queue, opts)
@@ -236,7 +241,7 @@ export class CarrotMQ extends EventEmitter {
     const {content, contentType} = makeContent(message)
     options.contentType = contentType
     options.appId = this.appId
-    const channel = await this.connection.createChannel()
+    const channel = await this.createChannel()
     await channel.sendToQueue(queue, content, options)
     await channel.close()
   }
@@ -250,19 +255,14 @@ export class CarrotMQ extends EventEmitter {
    * @returns {Bluebird.<void>}
    */
   async publish(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}) {
-    let that = this
-    if (!that.ready){
-      await new Bluebird(function (resolve) {
-        that.on('ready', resolve)
-      })
-    }
+    await this.awaitReady()
     if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, message)
     }
     const {content, contentType} = makeContent(message)
     options.contentType = contentType
     options.appId = this.appId
-    const channel = await this.connection.createChannel()
+    const channel = await this.createChannel()
     await channel.publish(exchange, routingKey, content, options)
     await channel.close()
   }
@@ -277,11 +277,7 @@ export class CarrotMQ extends EventEmitter {
    */
   async rpcExchange(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}):Promise<IRPCResult> {
     let that = this
-    if (!that.ready){
-      await new Bluebird(function (resolve) {
-        that.on('ready', resolve)
-      })
-    }
+    await this.awaitReady()
     if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, message)
     }
@@ -401,13 +397,11 @@ export class CarrotMQ extends EventEmitter {
    * get raw amqplib channel
    * @returns {Bluebird.<Channel>}
    */
-  async createChannel() {
-    if (!this.ready){
-      await new Bluebird((resolve) => {
-        this.on('ready', resolve)
-      })
-    }
-    return this.connection.createChannel()
+  async createChannel(): Promise<Channel> {
+    await this.awaitReady()
+    const ch = await this.connection.createChannel()
+    ch.on('error', this.emit.bind(this, ['error']))
+    return ch
   }
 
   /**
@@ -421,9 +415,12 @@ export class CarrotMQ extends EventEmitter {
 
   private async awaitReady() {
     if(!this.ready) {
-      await new Promise((resolve) => {
-        this.on('ready', resolve)
-      })
+      if (!this.readyPromise) {
+        this.readyPromise = new Promise((resolve) => {
+          this.on('ready', resolve)
+        })
+      }
+      await this.readyPromise
     }
   }
 
