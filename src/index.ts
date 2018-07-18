@@ -9,7 +9,7 @@ import {EventEmitter} from 'events'
 import * as Bluebird from 'bluebird'
 import {ValidationError} from './lib/ValidationError'
 import {Channel, Connection, Options, Replies} from 'amqplib'
-import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
+import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType, Unpacked} from './types'
 
 import rabbitmqSchema = require('rabbitmq-schema')
 import * as os from 'os'
@@ -353,7 +353,7 @@ export class CarrotMQ extends EventEmitter {
       appId: this.appId,
     })
     let rpcResult:IRPCResult
-    let consumer: {consumerTag: string}
+    let consumer: Unpacked<ReturnType<CarrotMQ['queue']>>
     return new Bluebird<IRPCResult>(function (resolve) {
       return that.queue(callbackQueue, async function (data, ctx) {
         if (ctx.properties.correlationId !== correlationId) return ctx.reject(true)
@@ -387,8 +387,9 @@ export class CarrotMQ extends EventEmitter {
           await rpcResult.ack()
         } else {
           await channel.cancel(consumer.consumerTag)
+          await consumer.channel.close()
         }
-        return channel.close()
+        await channel.close()
       })
   }
 
