@@ -50,6 +50,7 @@ describe('no schema queue', function () {
   it('rpc', async function () {
     app.queue('carrotmq.test.callback', (data, ctx) => {
       ctx.ack()
+      ctx.cancel()
       return ctx.reply(data)
     })
     const arr = []
@@ -65,5 +66,19 @@ describe('no schema queue', function () {
       await result.ack()
       result.data['data'].should.eql(data)
     }
+  })
+
+  it('parallel rpc', async function () {
+    app.queue('carrotmq.test.callback', (data, ctx) => {
+      ctx.ack()
+      ctx.reply(data)
+    })
+    await Bluebird.map(new Array(100).fill(0), async (e, i) => {
+      const res = await app.rpc('carrotmq.test.callback', i)
+      res.data.should.eql(i)
+      process.stdout.write(res.data + ',')
+      await res.ack()
+    })
+    process.stdout.write('\n')
   })
 });
