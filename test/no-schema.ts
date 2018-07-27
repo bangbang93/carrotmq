@@ -74,12 +74,14 @@ describe('no schema queue', function () {
       await ctx.ack()
       await ctx.reply(data)
     })
-    await Bluebird.map(new Array(100).fill(0), async (e, i) => {
+    await Bluebird.map(new Array(1000).fill(0), async (e, i) => {
       const res = await app.rpc('carrotmq.test.callback', i)
       res.data.should.eql(i)
       process.stdout.write(res.data + ',')
       await res.ack()
     })
+    app.rpcQueues.size.should.eql(1)
+    app.rpcListener.size.should.eql(0)
     process.stdout.write('\n')
   })
 });

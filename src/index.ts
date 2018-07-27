@@ -360,6 +360,7 @@ export class CarrotMQ extends EventEmitter {
     })
     let rpcResult:IRPCResult
     if (!this.rpcQueues.has(callbackQueue)) {
+      this.rpcQueues.add(callbackQueue)
       this.queue(callbackQueue, async (data, ctx) => {
         const correlationId = ctx.properties.correlationId
         const listener = this.rpcListener.get(correlationId)
