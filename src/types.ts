@@ -11,9 +11,11 @@ export interface IConfig {
 }
 
 export interface IRPCResult {
-  data: any,
-  ack(),
-  _ack: boolean,
+  data: any
+  ack()
+  _ack: boolean
+  properties: object
+  fields: object
 }
 
 export interface IContext {

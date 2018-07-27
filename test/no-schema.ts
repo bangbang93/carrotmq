@@ -8,9 +8,9 @@ import CarrotMQ from '../src/index'
 import * as should from 'should'
 import * as Bluebird from 'bluebird'
 
-const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST} = process.env;
+const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST, RABBITMQ_VHOST = ''} = process.env;
 
-const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/`;
+const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/${RABBITMQ_VHOST}`;
 
 let app;
 
@@ -48,16 +48,17 @@ describe('no schema queue', function () {
   });
 
   it('rpc', async function () {
-    app.queue('carrotmq.test.callback', (data, ctx) => {
-      ctx.ack()
-      ctx.cancel()
-      return ctx.reply(data)
+    const consumer = await app.queue('carrotmq.test.callback', async (data, ctx) => {
+      await ctx.ack()
+      await ctx.reply(data)
     })
     const arr = []
     for(let i = 0; i < 10; i++ ){
       arr[i] = rpc()
     }
     await Promise.all(arr)
+
+    await consumer.channel.cancel(consumer.consumerTag)
 
     async function rpc() {
       const data = Math.random()
@@ -69,9 +70,9 @@ describe('no schema queue', function () {
   })
 
   it('parallel rpc', async function () {
-    app.queue('carrotmq.test.callback', (data, ctx) => {
-      ctx.ack()
-      ctx.reply(data)
+    app.queue('carrotmq.test.callback', async (data, ctx) => {
+      await ctx.ack()
+      await ctx.reply(data)
     })
     await Bluebird.map(new Array(100).fill(0), async (e, i) => {
       const res = await app.rpc('carrotmq.test.callback', i)

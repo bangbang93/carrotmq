@@ -35,6 +35,8 @@ export class CarrotMQ extends EventEmitter {
 
   private isFirstConnection: boolean = true
   private readyPromise: Promise<void>
+  private readonly rpcQueues = new Set<string>()
+  private readonly rpcListener = new Map<string, Function>()
   /**
    * constructor
    * @param {string} uri amqp url
@@ -89,6 +91,8 @@ export class CarrotMQ extends EventEmitter {
     }
     this.ready = true
     this.manualClose = false
+    this.rpcQueues.clear()
+    this.rpcListener.clear()
     this.emit('ready')
     this.isFirstConnection = false
     return connection
@@ -300,6 +304,8 @@ export class CarrotMQ extends EventEmitter {
         ctx = {
           _ack: false,
           data,
+          properties: ctx.properties,
+          fields: ctx.fields,
           ack () {
             if (this._acked) return
             this._acked = true
@@ -353,26 +359,31 @@ export class CarrotMQ extends EventEmitter {
       appId: this.appId,
     })
     let rpcResult:IRPCResult
-    let consumer: {consumerTag: string, channel: Channel}
-    return new Bluebird<IRPCResult>(function (resolve) {
-      return that.queue(callbackQueue, async function (data, ctx) {
-        if (ctx.properties.correlationId !== correlationId) return ctx.reject(true)
-        rpcResult = {
-          _ack: false,
-          data,
-          ack: async () => {
-            if (rpcResult._ack) return
-            rpcResult._ack = true
-            await ctx.ack()
-            await ctx.cancel()
-          }
-        }
-        return resolve(rpcResult)
+    if (!this.rpcQueues.has(callbackQueue)) {
+      this.queue(callbackQueue, async (data, ctx) => {
+        const correlationId = ctx.properties.correlationId
+        const listener = this.rpcListener.get(correlationId)
+        if (!listener) return ctx.nack()
+        listener({data, ctx})
+        this.rpcListener.delete(correlationId)
       })
-        .then((c) => {
-          consumer = c
-          return c
-        })
+    }
+    return new Bluebird<IRPCResult>(async (resolve) => {
+      const defer = Bluebird.defer<{data, ctx: IContext}>()
+      this.rpcListener.set(correlationId, defer.resolve.bind(defer))
+      const {data, ctx} = await defer.promise
+      rpcResult = {
+        _ack: false,
+        data,
+        properties: ctx.properties,
+        fields: ctx.fields,
+        ack: async () => {
+          if (rpcResult._ack) return
+          rpcResult._ack = true
+          await ctx.ack()
+        }
+      }
+      resolve(rpcResult)
     })
       .timeout(this.config.rpcTimeout, 'rpc timeout')
       .catch(Bluebird.TimeoutError, (err) => {
@@ -385,11 +396,7 @@ export class CarrotMQ extends EventEmitter {
       .finally(async () => {
         if (rpcResult) {
           await rpcResult.ack()
-        } else {
-          await channel.cancel(consumer.consumerTag)
-          await consumer.channel.close()
         }
-        await channel.close()
       })
   }
 
