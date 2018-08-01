@@ -118,7 +118,8 @@ export class CarrotMQ extends EventEmitter {
     }
     const channel = await this.createChannel()
     if (!queue.startsWith('amq.')
-      && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))) {
+      && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))
+      && queue !== this.config.callbackQueue.queue) {
       await channel.assertQueue(queue, opts)
     }
     let consume: Replies.Consume
