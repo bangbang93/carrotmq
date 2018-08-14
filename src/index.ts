@@ -8,7 +8,7 @@ import * as amqplib from 'amqplib'
 import {EventEmitter} from 'events'
 import * as Bluebird from 'bluebird'
 import {ValidationError} from './lib/ValidationError'
-import {Channel, Connection, Options, Replies} from 'amqplib'
+import {Channel, ConfirmChannel, Connection, Options, Replies} from 'amqplib'
 import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
 
 import rabbitmqSchema = require('rabbitmq-schema')
@@ -106,12 +106,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [opts] see amqplib#assetQueue
    */
   async queue(queue: string, consumer:IConsumer, rpcQueue:boolean = false, opts:object = null) {
-    let that = this
-    if (!that.ready){
-      await new Bluebird(function (resolve) {
-        that.on('ready', resolve)
-      })
-    }
+    await this.awaitReady()
     if (!opts && typeof rpcQueue === 'object'){
       opts = rpcQueue
       rpcQueue = false
@@ -138,13 +133,13 @@ export class CarrotMQ extends EventEmitter {
         carrotmq: this,
         channel,
         _isAcked: false,
-        reply (msg, options?) {
+        reply: (msg, options?) => {
           let replyTo = ctx.replyTo || message.properties.replyTo
           if (!replyTo){
             throw new Error('empty reply queue')
           }
-          options = Object.assign(message.properties, options, {appId: that.appId})
-          return that.sendToQueue(replyTo, msg, options)
+          options = Object.assign(message.properties, options, {appId: this.appId})
+          return this.sendToQueue(replyTo, msg, options)
         },
         ack (allUpTo?) {
           if (ctx._isAcked) throw new Error('already acked')
@@ -204,7 +199,7 @@ export class CarrotMQ extends EventEmitter {
               ctx.reject()
             }
             ctx._isAcked = true
-            that.emit('error', err)
+            this.emit('error', err)
           })
         }
       } catch (e) {
@@ -212,7 +207,7 @@ export class CarrotMQ extends EventEmitter {
           ctx.reject()
         }
         ctx._isAcked = true
-        that.emit('error', e)
+        this.emit('error', e)
       }
     })
     consume = await reply
@@ -228,12 +223,7 @@ export class CarrotMQ extends EventEmitter {
    */
   async sendToQueue(queue: string, message: MessageType,
                     options: Options.Publish & {skipValidate?: boolean} = {}): Promise<void> {
-    let that = this
-    if (!that.ready){
-      await new Bluebird(function (resolve) {
-        that.on('ready', resolve)
-      })
-    }
+    await this.awaitReady()
     const skipValidate = options ? options.skipValidate : false
     if (!skipValidate && this.schema && this.schema.getQueueByName(queue)) {
       try {
@@ -335,13 +325,12 @@ export class CarrotMQ extends EventEmitter {
    * @returns {Bluebird.<{data, ack}>}
    */
   async rpc(queue: string, message: MessageType, callbackQueue?: string):Promise<IRPCResult> {
-    let that = this
     await this.awaitReady()
     if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, message)
     }
     const {content, contentType} = makeContent(message)
-    let channel    = await that.connection.createChannel()
+    let channel    = await this.createChannel()
     if (!callbackQueue) {
       if (this.config.callbackQueue) {
         callbackQueue = this.config.callbackQueue.queue
@@ -410,6 +399,13 @@ export class CarrotMQ extends EventEmitter {
   async createChannel(): Promise<Channel> {
     await this.awaitReady()
     const ch = await this.connection.createChannel()
+    ch.on('error', this.emit.bind(this, ['error']))
+    return ch
+  }
+
+  async createConfirmChannel(): Promise<ConfirmChannel> {
+    await this.awaitReady()
+    const ch = await this.connection.createConfirmChannel()
     ch.on('error', this.emit.bind(this, ['error']))
     return ch
   }
