@@ -104,7 +104,7 @@ describe('no schema queue', function () {
       await Bluebird.delay(2e3)
       // ctx.reply({time: new Date()})
     })
-    ;app.rpc('carrotmq.test.rpc', {time: new Date()}).should.throw('rpc timeout')
+    app.rpc('carrotmq.test.rpc', {time: new Date()}).should.be.rejectedWith('rpc timeout')
     await Bluebird.delay(1e3)
     await listener.channel.checkQueue('carrotmq.test.callback')
   })
