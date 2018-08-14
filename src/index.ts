@@ -193,8 +193,8 @@ export class CarrotMQ extends EventEmitter {
 
       try {
         let result = consumer.call(ctx, ctx.content, ctx)
-        if (result && typeof result === 'object' && typeof result.catch === 'function'){
-          result.catch((err)=>{
+        if (result && typeof result === 'object' && typeof result.then === 'function'){
+          result.then(null, (err) => {
             if (!ctx._isAcked) {
               ctx.reject()
             }

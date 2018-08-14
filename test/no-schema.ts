@@ -12,17 +12,7 @@ const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST, RABBITMQ_VHOST = ''} = p
 
 const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/${RABBITMQ_VHOST}`;
 
-let app;
-
-before('setup without schema', function (done) {
-  this.timeout(5000)
-  app = new CarrotMQ(uri, null, {
-    callbackQueue: {
-      queue: 'carrotmq.test.callback'
-    }
-  });
-  app.on('ready', done);
-});
+let app: CarrotMQ;
 
 after(function () {
   app.close();
@@ -32,6 +22,25 @@ let date = new Date();
 
 describe('no schema queue', function () {
   this.timeout(5000);
+
+  beforeEach('setup without schema', function (done) {
+    this.timeout(5000)
+    app = new CarrotMQ(uri, null, {
+      callbackQueue: {
+        queue: 'carrotmq.test.callback',
+        options: {
+          autoDelete: true,
+          exclusive: true,
+          durable: false,
+        }
+      }
+    });
+    app.on('ready', done);
+  });
+
+  afterEach('disconnect mq', function () {
+    return app.close()
+  })
 
   it('queue', function (done) {
     app.queue('fooQueue', function (data) {
@@ -70,7 +79,7 @@ describe('no schema queue', function () {
   })
 
   it('parallel rpc', async function () {
-    app.queue('carrotmq.test.callback', async (data, ctx) => {
+    const listener = await app.queue('carrotmq.test.callback', async (data, ctx) => {
       await ctx.ack()
       await Bluebird.delay(~~(Math.random() * 20 + 1))
       await ctx.reply(data)
@@ -81,8 +90,21 @@ describe('no schema queue', function () {
       process.stdout.write(res.data + ',')
       await res.ack()
     })
-    app.rpcQueues.size.should.eql(1)
-    app.rpcListener.size.should.eql(0)
+    app['rpcQueues'].size.should.eql(1)
+    app['rpcListener'].size.should.eql(0)
     process.stdout.write('\n')
+    await listener.channel.cancel(listener.consumerTag)
+  })
+
+  it('timeout', async function () {
+    this.timeout(10e3)
+    app.config.rpcTimeout = 1e3
+    const listener = await app.queue('carrotmq.test.rpc', async (data, ctx) => {
+      await Bluebird.delay(2e3)
+      ctx.reply({time: new Date()})
+    })
+    ;app.rpc('carrotmq.test.rpc', {time: new Date()}).should.throw('rpc timeout')
+    await Bluebird.delay(1e3)
+    await listener.channel.checkQueue('carrotmq.test.callback')
   })
 });
