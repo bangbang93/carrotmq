@@ -79,6 +79,7 @@ describe('no schema queue', function () {
   })
 
   it('parallel rpc', async function () {
+    this.timeout(30e3)
     const listener = await app.queue('carrotmq.test.callback', async (data, ctx) => {
       await ctx.ack()
       await Bluebird.delay(~~(Math.random() * 20 + 1))
