@@ -102,7 +102,7 @@ describe('no schema queue', function () {
     app.config.rpcTimeout = 1e3
     const listener = await app.queue('carrotmq.test.rpc', async (data, ctx) => {
       await Bluebird.delay(2e3)
-      ctx.reply({time: new Date()})
+      // ctx.reply({time: new Date()})
     })
     ;app.rpc('carrotmq.test.rpc', {time: new Date()}).should.throw('rpc timeout')
     await Bluebird.delay(1e3)
