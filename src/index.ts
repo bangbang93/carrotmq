@@ -359,12 +359,12 @@ export class CarrotMQ extends EventEmitter {
         this.rpcListener.delete(correlationId)
       })
     }
-    return new Bluebird<IRPCResult>(async (resolve) => {
-      const {data, ctx} = await new Promise<{data, ctx: IContext}>((r) => {
-        this.rpcListener.set(correlationId, r)
+    try {
+      const {data, ctx} = await new Bluebird<{data, ctx: IContext}>((resolve) => {
+        this.rpcListener.set(correlationId, resolve)
       })
-
-      rpcResult = {
+        .timeout(this.config.rpcTimeout, 'rpc timeout')
+      const rpcResult: IRPCResult = {
         _ack: false,
         data,
         properties: ctx.properties,
@@ -375,22 +375,22 @@ export class CarrotMQ extends EventEmitter {
           await ctx.ack()
         }
       }
-      resolve(rpcResult)
-    })
-      .timeout(this.config.rpcTimeout, 'rpc timeout')
-      .catch(Bluebird.TimeoutError, (err) => {
+      return rpcResult
+    } catch (err) {
+      if (err instanceof Bluebird.TimeoutError) {
         let e = new Error('rpc timeout')
         e['cause'] = err
         e['queue'] = queue
         e['data'] = message
         throw e
-    })
-      .finally(async () => {
-        if (rpcResult) {
-          await rpcResult.ack()
-        }
-        await channel.close()
-      })
+      }
+      throw err
+    } finally {
+      if (rpcResult) {
+        await rpcResult.ack()
+      }
+      await channel.close()
+    }
   }
 
   /**
