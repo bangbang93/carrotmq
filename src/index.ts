@@ -360,9 +360,10 @@ export class CarrotMQ extends EventEmitter {
       })
     }
     return new Bluebird<IRPCResult>(async (resolve) => {
-      const defer = Bluebird.defer<{data, ctx: IContext}>()
-      this.rpcListener.set(correlationId, defer.resolve.bind(defer))
-      const {data, ctx} = await defer.promise
+      const {data, ctx} = await new Promise<{data, ctx: IContext}>((r) => {
+        this.rpcListener.set(correlationId, r)
+      })
+
       rpcResult = {
         _ack: false,
         data,
