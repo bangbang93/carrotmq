@@ -378,11 +378,9 @@ export class CarrotMQ extends EventEmitter {
       return rpcResult
     } catch (err) {
       if (err instanceof Bluebird.TimeoutError) {
-        let e = new Error('rpc timeout')
-        e['cause'] = err
-        e['queue'] = queue
-        e['data'] = message
-        throw e
+        err['cause'] = err
+        err['queue'] = queue
+        err['data'] = message
       }
       throw err
     } finally {
