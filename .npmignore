@@ -1,0 +1,8 @@
+node_modules/
+
+docs/
+.idea/
+src/
+test/
+.jsdoc.json
+.travis.yml

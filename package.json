@@ -1,0 +1,47 @@
+{
+  "name": "carrotmq",
+  "version": "5.6.4",
+  "description": "easy way to use rabbitmq",
+  "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
+  "engines": {
+    "node": ">=6"
+  },
+  "scripts": {
+    "test": "mocha test/index.js",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "doc": "typedoc --out docs src && touch docs/.nojekyll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bangbang93/carrotmq.git"
+  },
+  "keywords": [
+    "rabbitmq",
+    "amqp",
+    "amqplib"
+  ],
+  "author": "bangbang93",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/bangbang93/carrotmq/issues"
+  },
+  "homepage": "https://github.com/bangbang93/carrotmq#readme",
+  "dependencies": {
+    "@types/amqplib": "^0.5.7",
+    "@types/bluebird": "^3.5.18",
+    "@types/mocha": "^5.0.0",
+    "@types/node": "^10.1.2",
+    "amqplib": "^0.5.1",
+    "bluebird": "^3.5.1",
+    "rabbitmq-schema": "^2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.0.5",
+    "should": "^13.2.1",
+    "ts-node": "^6.0.5",
+    "typedoc": "^0.11.1",
+    "typescript": "^2.9.2"
+  }
+}
