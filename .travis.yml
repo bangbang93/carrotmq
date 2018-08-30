@@ -12,3 +12,14 @@ services:
   - rabbitmq
 env:
   - RABBITMQ_USER=guest RABBITMQ_PASSWORD=guest RABBITMQ_HOST=localhost
+script:
+  - npm test
+  - npm run doc
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: true
+  on:
+    branch: master
