@@ -17,6 +17,7 @@ import * as os from 'os'
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
   callbackQueue: null,
+  appId: `${os.hostname()}:${process.title}:${process.pid}`
 }
 
 /**
@@ -51,7 +52,7 @@ export class CarrotMQ extends EventEmitter {
     this.uri    = uri
     this.schema = schema
     this.config = {...defaultConfig, ...config}
-    this.appId = `${os.hostname()}:${process.title}:${process.pid}`
+    this.appId = this.config.appId
     this.connect().catch((err) => {
       this.emit('error', err)
     })
