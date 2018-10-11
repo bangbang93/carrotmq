@@ -3,6 +3,7 @@ import {Channel, Options} from 'amqplib'
 import {Replies} from 'amqplib/properties'
 
 export interface IConfig {
+  appId?: string
   rpcTimeout?: number
   callbackQueue?: {
     queue: string,
