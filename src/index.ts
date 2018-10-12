@@ -1,9 +1,3 @@
-/**
- * Created by bangbang93 on 16-3-2.
- */
-
-
-'use strict'
 import * as amqplib from 'amqplib'
 import {EventEmitter} from 'events'
 import * as Bluebird from 'bluebird'
@@ -110,7 +104,7 @@ export class CarrotMQ extends EventEmitter {
    */
   async queue(queue: string, consumer: IConsumer, opts?: Options.AssertQueue) {
     await this.awaitReady()
-    const channel = await this.createChannel()
+    const channel = await this.createChannel(`queue:${queue}`)
     if (!queue.startsWith('amq.')
       && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))
       && this.config.callbackQueue && queue !== this.config.callbackQueue.queue) {
@@ -227,7 +221,7 @@ export class CarrotMQ extends EventEmitter {
     const {content, contentType} = makeContent(message)
     options.contentType = contentType
     options.appId = this.appId
-    const channel = await this.createChannel()
+    const channel = await this.createChannel(`sendToQueue:${queue}`)
     await channel.sendToQueue(queue, content, options)
     await channel.close()
   }
@@ -248,7 +242,7 @@ export class CarrotMQ extends EventEmitter {
     const {content, contentType} = makeContent(message)
     options.contentType = contentType
     options.appId = this.appId
-    const channel = await this.createChannel()
+    const channel = await this.createChannel(`publish:${exchange}`)
     await channel.publish(exchange, routingKey, content, options)
     await channel.close()
   }
@@ -334,7 +328,7 @@ export class CarrotMQ extends EventEmitter {
       this.schema.validateMessage(queue, message)
     }
     const {content, contentType} = makeContent(message)
-    let channel    = await this.createChannel()
+    const channel    = await this.createChannel(`rpc:${queue}`)
     if (!callbackQueue) {
       if (this.config.callbackQueue) {
         callbackQueue = this.config.callbackQueue.queue
@@ -397,14 +391,14 @@ export class CarrotMQ extends EventEmitter {
       await channel.close()
     }
   }
-
   /**
    * get raw amqplib channel
    * @returns {Bluebird.<Channel>}
    */
-  async createChannel(): Promise<Channel> {
+  async createChannel(reason?: string): Promise<Channel> {
     await this.awaitReady()
     const ch = await this.connection.createChannel()
+    ch.reason = reason
     ch.on('error', this.emit.bind(this, ['error']))
     this.channels.add(ch)
     ch.on('close', () => {

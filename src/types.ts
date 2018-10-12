@@ -45,3 +45,9 @@ export interface ICarrotMQMessage {
   content: MessageType,
   contentType: string
 }
+
+declare module 'amqplib' {
+  interface Channel {
+    reason: string
+  }
+}
