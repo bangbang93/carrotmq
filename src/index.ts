@@ -31,6 +31,7 @@ export class CarrotMQ extends EventEmitter {
   public connection: Connection
   public ready: boolean
   public appId: string
+  public readonly channels = new Set<Channel>()
 
   public manualClose: boolean
 
@@ -38,6 +39,7 @@ export class CarrotMQ extends EventEmitter {
   private readyPromise: Promise<void>
   private readonly rpcQueues = new Set<string>()
   private readonly rpcListener = new Map<string, Function>()
+
   /**
    * constructor
    * @param {string} uri amqp url
@@ -90,6 +92,7 @@ export class CarrotMQ extends EventEmitter {
     if (this.config.callbackQueue) {
       await channel.assertQueue(this.config.callbackQueue.queue, this.config.callbackQueue.options)
     }
+    channel.close()
     this.ready = true
     this.manualClose = false
     this.rpcQueues.clear()
@@ -403,6 +406,10 @@ export class CarrotMQ extends EventEmitter {
     await this.awaitReady()
     const ch = await this.connection.createChannel()
     ch.on('error', this.emit.bind(this, ['error']))
+    this.channels.add(ch)
+    ch.on('close', () => {
+      this.channels.delete(ch)
+    })
     return ch
   }
 
@@ -449,19 +456,19 @@ function makeContent(content: MessageType): ICarrotMQMessage{
       }
     case typeof content === 'string':
       return {
-        content: new Buffer(content, 'utf8'),
+        content: Buffer.from(content, 'utf8'),
         contentType: 'text/plain'
       }
     case typeof content === 'undefined':
       return {
-        content: new Buffer('undefined'),
+        content: Buffer.from('undefined'),
         contentType: 'undefined'
       }
     case typeof content === 'boolean':
     case typeof content === 'number':
     case typeof content === 'object':
       return {
-        content: new Buffer(JSON.stringify(content), 'utf8'),
+        content: Buffer.from(JSON.stringify(content), 'utf8'),
         contentType: 'application/json'
       }
     default:

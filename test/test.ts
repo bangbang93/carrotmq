@@ -79,6 +79,7 @@ describe('carrotmq', function () {
       })
       await app.publish('exchange0', 'foo.bar.key', {time: new Date})
     })
+    app.channels.size.should.eql(2)
   });
   it('should reject wrong schema', function (done) {
     let app;
