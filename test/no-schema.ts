@@ -40,7 +40,6 @@ describe('no schema queue', function () {
       }
     });
     await app.connect()
-    app.on('ready', done);
   });
 
   afterEach('disconnect mq', function () {

@@ -58,9 +58,6 @@ app.on('error', function (err) {
 before('setup with schema', async function (done){
   await app.connect()
   this.timeout(5000);
-  app.on('ready', function () {
-    done();
-  });
   app.on('error', function (err) {
     done(err);
   })
