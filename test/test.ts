@@ -55,17 +55,12 @@ app.on('error', function (err) {
   process.exit(-1);
 });
 
-before('setup with schema', async function (done){
+before('setup with schema', async function (){
   await app.connect()
-  this.timeout(5000);
-  app.on('error', function (err) {
-    done(err);
-  })
-  done()
 });
 
 after(function () {
-  app.close();
+  return app.close();
 });
 
 describe('carrotmq', function () {
