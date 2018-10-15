@@ -61,6 +61,7 @@ before('setup with schema', async function (done){
   app.on('error', function (err) {
     done(err);
   })
+  done()
 });
 
 after(function () {
