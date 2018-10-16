@@ -55,18 +55,12 @@ app.on('error', function (err) {
   process.exit(-1);
 });
 
-before('setup with schema', function (done){
-  this.timeout(5000);
-  app.on('ready', function () {
-    done();
-  });
-  app.on('error', function (err) {
-    done(err);
-  })
+before('setup with schema', async function (){
+  await app.connect()
 });
 
 after(function () {
-  app.close();
+  return app.close();
 });
 
 describe('carrotmq', function () {
@@ -85,6 +79,7 @@ describe('carrotmq', function () {
     let app;
     try {
       app = new carrotmq(uri, {});
+      app.connect()
       console.log(app);
     } catch (e) {
       if (e instanceof TypeError){

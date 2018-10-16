@@ -24,6 +24,7 @@ export class CarrotMQ extends EventEmitter {
   public config: IConfig
   public connection: Connection
   public ready: boolean
+  public isConnecting: boolean = false
   public appId: string
   public readonly channels = new Set<Channel>()
 
@@ -49,9 +50,6 @@ export class CarrotMQ extends EventEmitter {
     this.schema = schema
     this.config = {...defaultConfig, ...config}
     this.appId = this.config.appId
-    this.connect().catch((err) => {
-      this.emit('error', err)
-    })
   }
 
   /**
@@ -59,10 +57,11 @@ export class CarrotMQ extends EventEmitter {
    * @returns {Bluebird.<void>}
    */
   async connect(): Promise<Connection>{
+    this.isConnecting = true
     let connection  = await amqplib.connect(this.uri)
     this.connection = connection
     connection.on('close', onclose.bind(this))
-    connection.on('error', this.emit.bind(this, ['error']))
+    connection.on('error', (err) => this.emit('error', err))
     let channel = await connection.createChannel()
     if (this.schema) {
       let exchanges = this.schema.getExchanges()
@@ -86,8 +85,9 @@ export class CarrotMQ extends EventEmitter {
     if (this.config.callbackQueue) {
       await channel.assertQueue(this.config.callbackQueue.queue, this.config.callbackQueue.options)
     }
-    channel.close()
+    await channel.close()
     this.ready = true
+    this.isConnecting = false
     this.manualClose = false
     this.rpcQueues.clear()
     this.rpcListener.clear()
@@ -425,6 +425,7 @@ export class CarrotMQ extends EventEmitter {
 
   private async awaitReady() {
     if(!this.ready) {
+      if (!this.isConnecting) throw new Error('no connection')
       if (!this.readyPromise) {
         this.readyPromise = new Promise((resolve) => {
           this.on('ready', resolve)

@@ -14,16 +14,12 @@ const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/${RAB
 
 let app: CarrotMQ;
 
-after(function () {
-  app.close();
-})
-
 let date = new Date();
 
 describe('no schema queue', function () {
   this.timeout(5000);
 
-  beforeEach('setup without schema', function (done) {
+  beforeEach('setup without schema', async function () {
     this.timeout(5000)
     app = new CarrotMQ(uri, null, {
       callbackQueue: {
@@ -35,7 +31,7 @@ describe('no schema queue', function () {
         }
       }
     });
-    app.on('ready', done);
+    await app.connect()
   });
 
   afterEach('disconnect mq', function () {
