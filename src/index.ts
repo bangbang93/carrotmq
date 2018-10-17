@@ -197,7 +197,7 @@ export class CarrotMQ extends EventEmitter {
       }
     })
     consume = await reply
-    return {consumerTag: consume.consumerTag, channel}
+    return {consumerTag: consume.consumerTag, channel, queue}
   }
 
   /**
