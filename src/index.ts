@@ -420,6 +420,7 @@ export class CarrotMQ extends EventEmitter {
   close() {
     if (!this.connection) return
     this.manualClose = true
+    this.ready = false
     return this.connection.close()
   }
 
