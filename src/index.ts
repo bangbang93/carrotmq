@@ -365,7 +365,7 @@ export class CarrotMQ extends EventEmitter {
         this.rpcListener.set(correlationId, resolve)
       })
         .timeout(this.config.rpcTimeout, 'rpc timeout')
-      const rpcResult: IRPCResult = {
+      rpcResult = {
         _ack: false,
         data,
         properties: ctx.properties,
