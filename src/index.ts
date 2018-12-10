@@ -11,7 +11,11 @@ import * as os from 'os'
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
   callbackQueue: null,
-  appId: `${os.hostname()}:${process.title}:${process.pid}`
+  appId: `${os.hostname()}:${process.title}:${process.pid}`,
+  reconnect: {
+    timeout: 10e3,
+    times: 10,
+  }
 }
 
 /**
@@ -487,8 +491,18 @@ function decodeContent(content: ICarrotMQMessage): MessageType {
   }
 }
 
-function onclose (arg) {
+let connectTry = 0
+function onclose (this: CarrotMQ, arg) {
   this.connection = null
   this.ready = false
-  this.emit('close', arg)
+  if (!this.manualClose && this.config.reconnect && connectTry < this.config.reconnect.times) {
+    this.emit('reconnect', arg)
+    setTimeout(() => {
+      connectTry ++
+      this.connect()
+        .catch((err) => this.emit('error', err))
+    }, this.config.reconnect.timeout)
+  } else {
+    this.emit('close', arg)
+  }
 }

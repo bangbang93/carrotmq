@@ -9,6 +9,10 @@ export interface IConfig {
     queue: string,
     options?: Options.AssertQueue
   },
+  reconnect?: {
+    timeout: number,
+    times: number,
+  } | false
 }
 
 export interface IRPCResult {
