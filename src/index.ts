@@ -279,8 +279,15 @@ export class CarrotMQ extends EventEmitter {
       await this.queue(callbackQueue, async (data, ctx) => {
         const correlationId = ctx.properties.correlationId
         const listener = this.rpcListener.get(correlationId)
-        if (!listener) return ctx.nack()
-        listener({data, ctx})
+        if (!listener) {
+          const err = new Error('no such listener')
+          err['correlationId'] = correlationId
+          err['data'] = data
+          err['queue'] = callbackQueue
+          this.emit('error', err)
+        } else {
+          listener({data, ctx})
+        }
         this.rpcListener.delete(correlationId)
       })
     }
@@ -355,7 +362,7 @@ export class CarrotMQ extends EventEmitter {
           err['correlationId'] = correlationId
           err['data'] = data
           err['queue'] = callbackQueue
-          return this.emit('error', err)
+          this.emit('error', err)
         } else {
           listener({data, ctx})
         }
