@@ -282,6 +282,8 @@ export class CarrotMQ extends EventEmitter {
         if (!listener) {
           const err = new Error('no such listener')
           err['correlationId'] = correlationId
+          err['exchange'] = exchange
+          err['routingKey'] = routingKey
           err['data'] = data
           err['queue'] = callbackQueue
           this.emit('error', err)
@@ -313,8 +315,8 @@ export class CarrotMQ extends EventEmitter {
       return rpcResult
     } catch (err) {
       if (err instanceof Bluebird.TimeoutError) {
-        err['cause'] = err
         err['exchange'] = exchange
+        err['routingKey'] = routingKey
         err['data'] = message
       }
       throw err
@@ -397,7 +399,6 @@ export class CarrotMQ extends EventEmitter {
       return rpcResult
     } catch (err) {
       if (err instanceof Bluebird.TimeoutError) {
-        err['cause'] = err
         err['queue'] = queue
         err['data'] = message
       }
