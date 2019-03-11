@@ -7,7 +7,6 @@ export class Context extends EventEmitter implements IContext {
   public replyTo: string
   public fields: MessageFields
   public properties: MessageProperties
-  public channel: Channel
 
   public isAcked: boolean
 
@@ -19,8 +18,12 @@ export class Context extends EventEmitter implements IContext {
     public message: Message,
     public carrotmq: CarrotMQ,
     public content: any,
+    public channel: Channel,
   ) {
     super()
+    this.replyTo = message.properties.replyTo
+    this.fields = message.fields
+    this.properties = message.properties
   }
 
   public reply(msg: any, options?: Options.Publish) {

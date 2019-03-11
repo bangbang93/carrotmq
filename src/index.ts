@@ -131,10 +131,12 @@ export class CarrotMQ extends EventEmitter {
         message,
         channel,
       })
-      const ctx = new Context(message, this, decodeContent({
+
+      const content = decodeContent({
         content: message.content,
         contentType: message.properties.contentType,
-      }))
+      })
+      const ctx = new Context(message, this, content, channel)
 
       ctx.once('cancel', () => {
         this.removeQueueConsumer(queue, consumer)
