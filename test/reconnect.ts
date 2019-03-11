@@ -30,4 +30,8 @@ describe('reconnect', function () {
     })
     return p
   })
+
+  after('disconnect mq', () => {
+    return app.close()
+  })
 })
