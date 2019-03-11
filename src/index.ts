@@ -13,8 +13,8 @@ const defaultConfig: IConfig = {
   callbackQueue: null,
   appId: `${os.hostname()}:${process.title}:${process.pid}`,
   reconnect: {
-    timeout: 10e3,
-    times: 10,
+    timeout: 3e3,
+    times: 5,
   },
 }
 
