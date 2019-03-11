@@ -116,9 +116,10 @@ export class CarrotMQ extends EventEmitter {
    * @param {Options.AssertQueue} [opts] see amqplib#assetQueue
    */
   public async queue(queue: string, consumer: IConsumer, opts?: Options.AssertQueue) {
-    await this.addQueueConsumer(queue, consumer)
     await this.awaitReady()
+    this.addQueueConsumer(queue, consumer)
     const channel = await this.createChannel(`queue:${queue}`)
+    channel.on('close', () => this.removeQueueConsumer(queue, consumer))
     if (!queue.startsWith('amq.')
       && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))
       && this.config.callbackQueue && queue !== this.config.callbackQueue.queue) {

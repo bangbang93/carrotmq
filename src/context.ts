@@ -27,7 +27,7 @@ export class Context extends EventEmitter implements IContext {
   }
 
   public reply(msg: any, options?: Options.Publish) {
-    const replyTo = this.replyTo || this.message.properties.replyTo
+    const replyTo = this.replyTo
     if (!replyTo) throw new Error('empty reply queue')
     options = {...this.message.properties, ...options, appId: this.carrotmq.appId}
     return this.carrotmq.sendToQueue(replyTo, msg, options)
