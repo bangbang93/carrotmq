@@ -1,12 +1,12 @@
 import * as amqplib from 'amqplib'
-import {EventEmitter} from 'events'
-import * as Bluebird from 'bluebird'
-import {ValidationError} from './lib/ValidationError'
 import {Channel, ConfirmChannel, Connection, Options, Replies} from 'amqplib'
-import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
-
-import rabbitmqSchema = require('rabbitmq-schema')
+import * as Bluebird from 'bluebird'
+import {EventEmitter} from 'events'
 import * as os from 'os'
+import {Context} from './context'
+import {ValidationError} from './lib/ValidationError'
+import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
+import rabbitmqSchema = require('rabbitmq-schema')
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -15,7 +15,7 @@ const defaultConfig: IConfig = {
   reconnect: {
     timeout: 10e3,
     times: 10,
-  }
+  },
 }
 
 /**
@@ -23,6 +23,10 @@ const defaultConfig: IConfig = {
  * @extends EventEmitter
  */
 export class CarrotMQ extends EventEmitter {
+
+  public static schema: rabbitmqSchema = rabbitmqSchema
+  public static ValidationError = ValidationError
+  public static validationError = ValidationError
   public uri: string | Options.Connect
   public schema: rabbitmqSchema | null
   public config: IConfig
@@ -38,6 +42,7 @@ export class CarrotMQ extends EventEmitter {
   private readyPromise: Promise<void>
   private readonly rpcQueues = new Set<string>()
   private readonly rpcListener = new Map<string, Function>()
+  private consumers = new Map<string, Set<IConsumer>>()
 
   /**
    * constructor
@@ -45,7 +50,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
    * @param {IConfig} [config] config
    */
-  constructor(uri: string | Options.Connect, schema?: rabbitmqSchema, config:IConfig = defaultConfig) {
+  constructor(uri: string | Options.Connect, schema?: rabbitmqSchema, config: IConfig = defaultConfig) {
     super()
     if (schema && !(schema instanceof rabbitmqSchema)) {
       throw new TypeError('arguments must be rabbitmqSchema')
@@ -60,21 +65,21 @@ export class CarrotMQ extends EventEmitter {
    * connect to rabbitmq, auto call when construct,or can be called manually when need reconnect
    * @returns {Bluebird.<void>}
    */
-  async connect(): Promise<Connection>{
+  public async connect(): Promise<Connection> {
     this.isConnecting = true
-    let connection  = await amqplib.connect(this.uri)
+    const connection  = await amqplib.connect(this.uri)
     this.connection = connection
     connection.on('close', onclose.bind(this))
     connection.on('error', (err) => this.emit('error', err))
-    let channel = await connection.createChannel()
+    const channel = await connection.createChannel()
     if (this.schema) {
-      let exchanges = this.schema.getExchanges()
-      for(const exchange of exchanges) {
+      const exchanges = this.schema.getExchanges()
+      for (const exchange of exchanges) {
         await channel.assertExchange(exchange.exchange, exchange.type, exchange.options)
-        let bindings = exchange.getDirectBindings()
-        for(const binding of bindings) {
-          let dest = binding.destination
-          let src  = binding.source
+        const bindings = exchange.getDirectBindings()
+        for (const binding of bindings) {
+          const dest = binding.destination
+          const src  = binding.source
           if (dest.queue) {
             await channel.assertQueue(dest.queue, dest.options)
             await channel.bindQueue(dest.queue, src.exchange, binding.routingPattern)
@@ -95,6 +100,10 @@ export class CarrotMQ extends EventEmitter {
     this.manualClose = false
     this.rpcQueues.clear()
     this.rpcListener.clear()
+    if (!this.isFirstConnection) {
+      // restore consumer
+      await this.restoreConsumer()
+    }
     this.emit('ready')
     this.isFirstConnection = false
     return connection
@@ -106,7 +115,8 @@ export class CarrotMQ extends EventEmitter {
    * @param {function} consumer consumer function
    * @param {Options.AssertQueue} [opts] see amqplib#assetQueue
    */
-  async queue(queue: string, consumer: IConsumer, opts?: Options.AssertQueue) {
+  public async queue(queue: string, consumer: IConsumer, opts?: Options.AssertQueue) {
+    await this.addQueueConsumer(queue, consumer)
     await this.awaitReady()
     const channel = await this.createChannel(`queue:${queue}`)
     if (!queue.startsWith('amq.')
@@ -121,47 +131,13 @@ export class CarrotMQ extends EventEmitter {
         message,
         channel,
       })
-      const ctx: IContext = {
-        replyTo: null,
-        content: null,
-        message,
-        fields    : message.fields,
-        properties: message.properties,
-        carrotmq: this,
-        channel,
-        _isAcked: false,
-        reply: (msg, options?) => {
-          let replyTo = ctx.replyTo || message.properties.replyTo
-          if (!replyTo){
-            throw new Error('empty reply queue')
-          }
-          options = Object.assign(message.properties, options, {appId: this.appId})
-          return this.sendToQueue(replyTo, msg, options)
-        },
-        ack (allUpTo?) {
-          if (ctx._isAcked) throw new Error('already acked')
-          ctx._isAcked = true
-          return channel.ack(message, allUpTo)
-        },
-        nack (allUpTo?, requeue?) {
-          if (ctx._isAcked) throw new Error('already acked')
-          ctx._isAcked = true
-          return channel.nack(message, allUpTo, requeue)
-        },
-        reject (requeue?) {
-          if (ctx._isAcked) throw new Error('already acked')
-          ctx._isAcked = true
-          return channel.reject(message, requeue)
-        },
-        async cancel () {
-          if (!ctx._isAcked) throw new Error('cannot cancel before ack')
-          await channel.cancel(message.fields['consumerTag'])
-          await channel.close();
-        },
-      }
-      ctx.content = decodeContent({
+      const ctx = new Context(message, this, decodeContent({
         content: message.content,
-        contentType: message.properties.contentType
+        contentType: message.properties.contentType,
+      }))
+
+      ctx.once('cancel', () => {
+        this.removeQueueConsumer(queue, consumer)
       })
 
       if (this.schema && this.schema.getQueueByName(queue)) {
@@ -169,10 +145,10 @@ export class CarrotMQ extends EventEmitter {
           this.schema.validateMessage(queue, ctx.content)
         } catch (e) {
           const err = new ValidationError(message, channel, queue, e)
-          if (this.listenerCount(`validationError:${queue}`) !== 0){
+          if (this.listenerCount(`validationError:${queue}`) !== 0) {
             return this.emit(`validationError:${queue}`, err)
           }
-          if (message.properties.replyTo){
+          if (message.properties.replyTo) {
             return ctx.reply({err})
               .then(() => ctx.ack())
           } else {
@@ -182,21 +158,19 @@ export class CarrotMQ extends EventEmitter {
       }
 
       try {
-        let result = consumer.call(ctx, ctx.content, ctx)
-        if (result && typeof result === 'object' && typeof result.then === 'function'){
+        const result = consumer.call(ctx, ctx.content, ctx)
+        if (result && typeof result === 'object' && typeof result.then === 'function') {
           result.then(null, (err) => {
-            if (!ctx._isAcked) {
+            if (!ctx.isAcked) {
               ctx.reject()
             }
-            ctx._isAcked = true
             this.emit('error', err)
           })
         }
       } catch (e) {
-        if (!ctx._isAcked) {
+        if (!ctx.isAcked) {
           ctx.reject()
         }
-        ctx._isAcked = true
         this.emit('error', e)
       }
     })
@@ -211,7 +185,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#assetQueue
    * @returns {Promise.<void>}
    */
-  async sendToQueue(queue: string, message: MessageType,
+  public async sendToQueue(queue: string, message: MessageType,
                     options: Options.Publish & {skipValidate?: boolean} = {}): Promise<void> {
     await this.awaitReady()
     const skipValidate = options ? options.skipValidate : false
@@ -238,7 +212,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  async publish(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}) {
+  public async publish(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}) {
     await this.awaitReady()
     if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, message)
@@ -259,14 +233,14 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  async rpcExchange(exchange: string, routingKey: string, message: MessageType,
+  public async rpcExchange(exchange: string, routingKey: string, message: MessageType,
                     options: Options.Publish = {}): Promise<IRPCResult> {
     await this.awaitReady()
 
     if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, message)
     }
-    let channel = await this.connection.createChannel()
+    const channel = await this.connection.createChannel()
     const {content, contentType} = makeContent(message)
     const correlationId = Math.random().toString(16).substr(2)
     const callbackQueue = this.config.callbackQueue.queue
@@ -294,7 +268,7 @@ export class CarrotMQ extends EventEmitter {
       })
     }
     await channel.publish(exchange, routingKey, content, options)
-    let rpcResult:IRPCResult
+    let rpcResult: IRPCResult
 
     try {
       const {data, ctx} = await new Bluebird<{data, ctx: IContext}>((resolve) => {
@@ -310,7 +284,7 @@ export class CarrotMQ extends EventEmitter {
           if (rpcResult._ack) return
           rpcResult._ack = true
           await ctx.ack()
-        }
+        },
       }
       return rpcResult
     } catch (err) {
@@ -335,7 +309,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {string} [callbackQueue] 回调队列名
    * @returns {Bluebird.<{data, ack}>}
    */
-  async rpc(queue: string, message: MessageType, callbackQueue?: string):Promise<IRPCResult> {
+  public async rpc(queue: string, message: MessageType, callbackQueue?: string): Promise<IRPCResult> {
     await this.awaitReady()
     if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, message)
@@ -372,7 +346,7 @@ export class CarrotMQ extends EventEmitter {
       })
     }
 
-    let rpcResult:IRPCResult
+    let rpcResult: IRPCResult
     await channel.sendToQueue(queue, content, {
       replyTo: callbackQueue,
       correlationId,
@@ -394,7 +368,7 @@ export class CarrotMQ extends EventEmitter {
           if (rpcResult._ack) return
           rpcResult._ack = true
           await ctx.ack()
-        }
+        },
       }
       return rpcResult
     } catch (err) {
@@ -414,7 +388,7 @@ export class CarrotMQ extends EventEmitter {
    * get raw amqplib channel
    * @returns {Bluebird.<Channel>}
    */
-  async createChannel(reason?: string): Promise<Channel> {
+  public async createChannel(reason?: string): Promise<Channel> {
     await this.awaitReady()
     const ch = await this.connection.createChannel()
     ch.reason = reason
@@ -426,7 +400,7 @@ export class CarrotMQ extends EventEmitter {
     return ch
   }
 
-  async createConfirmChannel(): Promise<ConfirmChannel> {
+  public async createConfirmChannel(): Promise<ConfirmChannel> {
     await this.awaitReady()
     const ch = await this.connection.createConfirmChannel()
     ch.on('error', this.emit.bind(this, ['error']))
@@ -436,7 +410,7 @@ export class CarrotMQ extends EventEmitter {
   /**
    * close connection
    */
-  close() {
+  public close() {
     if (!this.connection) return
     this.manualClose = true
     this.ready = false
@@ -444,7 +418,7 @@ export class CarrotMQ extends EventEmitter {
   }
 
   private async awaitReady() {
-    if(!this.ready) {
+    if (!this.ready) {
       if (!this.isConnecting) throw new Error('no connection')
       if (!this.readyPromise) {
         this.readyPromise = new Promise((resolve) => {
@@ -455,36 +429,54 @@ export class CarrotMQ extends EventEmitter {
     }
   }
 
-  public static schema: rabbitmqSchema = rabbitmqSchema
-  public static ValidationError = ValidationError
-  public static validationError = ValidationError
+  private addQueueConsumer(queue: string, consumer: IConsumer) {
+    let set = this.consumers.get(queue)
+    if (!set) {
+      set = new Set()
+      this.consumers.set(queue, set)
+    }
+    set.add(consumer)
+  }
+
+  private removeQueueConsumer(queue: string, consumer: IConsumer) {
+    const consumers = this.consumers.get(queue)
+    consumers.delete(consumer)
+  }
+
+  private async restoreConsumer() {
+    for (const [queue, consumers] of this.consumers) {
+      for (const consumer of consumers) {
+        await this.queue(queue, consumer)
+      }
+    }
+  }
 }
 
 export default CarrotMQ
 
-function makeContent(content: MessageType): ICarrotMQMessage{
+function makeContent(content: MessageType): ICarrotMQMessage {
   switch (true) {
     case Buffer.isBuffer(content):
       return {
         content,
-        contentType: 'buffer'
+        contentType: 'buffer',
       }
     case typeof content === 'string':
       return {
         content: Buffer.from(content, 'utf8'),
-        contentType: 'text/plain'
+        contentType: 'text/plain',
       }
     case typeof content === 'undefined':
       return {
         content: Buffer.from('undefined'),
-        contentType: 'undefined'
+        contentType: 'undefined',
       }
     case typeof content === 'boolean':
     case typeof content === 'number':
     case typeof content === 'object':
       return {
         content: Buffer.from(JSON.stringify(content), 'utf8'),
-        contentType: 'application/json'
+        contentType: 'application/json',
       }
     default:
       throw new TypeError('unknown message')
@@ -507,7 +499,7 @@ function decodeContent(content: ICarrotMQMessage): MessageType {
 }
 
 let connectTry = 0
-function onclose (this: CarrotMQ, arg) {
+function onclose(this: CarrotMQ, arg) {
   this.connection = null
   this.ready = false
   if (!this.manualClose && this.config.reconnect && connectTry < this.config.reconnect.times) {

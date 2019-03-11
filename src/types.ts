@@ -1,3 +1,4 @@
+import {Context} from './context'
 import CarrotMQ from './index'
 import {Channel, Options} from 'amqplib'
 import {Replies} from 'amqplib/properties'
@@ -40,7 +41,7 @@ export interface IContext {
 }
 
 export interface IConsumer {
-  (this: IContext, data: any, ctx: IContext): any
+  (this: Context, data: any, ctx: IContext): any
 }
 
 export type MessageType = any|boolean|number|string|Buffer
