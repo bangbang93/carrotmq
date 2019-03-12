@@ -96,15 +96,15 @@
 
 <span class="hljs-keyword">const</span> publisher = <span class="hljs-keyword">new</span> CarrotMQ(<span class="hljs-string">'amqp://localhost'</span>); <span class="hljs-comment">//also can use without schema</span>
 
-mq.queue(<span class="hljs-string">'fooQueue'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>)</span>{
+mq.queue(<span class="hljs-string">'fooQueue'</span>, <span class="hljs-keyword">async</span> (data, ctx) =&gt; {
     <span class="hljs-built_in">console</span>.log(data);
-    <span class="hljs-keyword">this</span>.ack();
-    <span class="hljs-comment">//this.nack();</span>
-    <span class="hljs-comment">//this.reject();</span>
-    <span class="hljs-comment">//this.cancel(); cancel this consumer;</span>
-    <span class="hljs-keyword">this</span>.reply({<span class="hljs-attr">date</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>}); <span class="hljs-comment">//reply to message.properties.relyTo</span>
-    <span class="hljs-keyword">this</span>.carrotmq <span class="hljs-comment">//carrotmq instrance</span>
-    <span class="hljs-keyword">this</span>.channel  <span class="hljs-comment">//current channel</span>
+    ctx.ack();
+    <span class="hljs-comment">//ctx.nack();</span>
+    <span class="hljs-comment">//ctx.reject();</span>
+    <span class="hljs-comment">//ctx.cancel(); cancel this consumer;</span>
+    ctx.reply({<span class="hljs-attr">date</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>}); <span class="hljs-comment">//reply to message.properties.relyTo</span>
+    ctx.carrotmq <span class="hljs-comment">//carrotmq instrance</span>
+    ctx.channel  <span class="hljs-comment">//current channel</span>
     <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.reject(); <span class="hljs-comment">// or throw new Error('some thing happened') will execute `this.reject()` if this message hadn't been ack</span>
 });
 
@@ -182,21 +182,17 @@ mq.on(<span class="hljs-string">'validationError:fooQueue'</span>, <span class="
 <span class="hljs-comment">//    }</span>
 <span class="hljs-comment">//  }</span>
 
-app.queue(<span class="hljs-string">'rpcQueue'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
-  <span class="hljs-keyword">this</span>.reply(data);
-  <span class="hljs-keyword">this</span>.ack();
-}, <span class="hljs-literal">true</span>);   <span class="hljs-comment">/* true here for mark this queue is a rpc queue,
-carrotmq will wrap real content with json {replyTo: 'queue', content: {buffer}}
-for replyTo properties,because of rabbitMQ will ignore
-message sent to exchange with vanilla replyTo ,
-if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/</span>
+app.queue(<span class="hljs-string">'rpcQueue'</span>, <span class="hljs-keyword">async</span> (data, ctx) =&gt; {
+  <span class="hljs-keyword">await</span> ctx.reply(data);
+  <span class="hljs-keyword">await</span> ctx.ack();
+});
 
 <span class="hljs-keyword">let</span> time = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
 app.rpcExchange(<span class="hljs-string">'exchange0'</span>, <span class="hljs-string">'rpc.rpc'</span>, {time})
 .then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">reply</span>)</span>{
   reply.ack();
   <span class="hljs-built_in">console</span>.log(reply.data)<span class="hljs-comment">//{time: time}</span>
-})</code></pre>
+}) <span class="hljs-comment">// if target exchange is an topic or fanout exchange, only the first reply will be accepted.</span></code></pre>
 				<h2 id="events">events</h2>
 				<h3 id="ready">ready</h3>
 				<p>emit after connection established</p>
