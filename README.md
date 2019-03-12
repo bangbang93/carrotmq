@@ -37,15 +37,15 @@ const mq = new CarrotMQ('amqp://localhost', schema);
 
 const publisher = new CarrotMQ('amqp://localhost'); //also can use without schema
 
-mq.queue('fooQueue', function (data){
+mq.queue('fooQueue', async (data, ctx) => {
     console.log(data);
-    this.ack();
-    //this.nack();
-    //this.reject();
-    //this.cancel(); cancel this consumer;
-    this.reply({date: new Date}); //reply to message.properties.relyTo
-    this.carrotmq //carrotmq instrance
-    this.channel  //current channel
+    ctx.ack();
+    //ctx.nack();
+    //ctx.reject();
+    //ctx.cancel(); cancel this consumer;
+    ctx.reply({date: new Date}); //reply to message.properties.relyTo
+    ctx.carrotmq //carrotmq instrance
+    ctx.channel  //current channel
     return Promise.reject(); // or throw new Error('some thing happened') will execute `this.reject()` if this message hadn't been ack
 });
 
@@ -136,21 +136,17 @@ mq.rpc('carrotmq.rpc', {data: 'foo'}, 'carrotmq.rpc.callback')
 //    }
 //  }
 
-app.queue('rpcQueue', function (data) {
-  this.reply(data);
-  this.ack();
-}, true);   /* true here for mark this queue is a rpc queue,
-carrotmq will wrap real content with json {replyTo: 'queue', content: {buffer}}
-for replyTo properties,because of rabbitMQ will ignore
-message sent to exchange with vanilla replyTo ,
-if server side doesn't using carrotmq ,just handle {replyTo: 'queue', content: {buffer}}*/
+app.queue('rpcQueue', async (data, ctx) => {
+  await ctx.reply(data);
+  await ctx.ack();
+});
 
 let time = new Date();
 app.rpcExchange('exchange0', 'rpc.rpc', {time})
 .then(function (reply){
   reply.ack();
   console.log(reply.data)//{time: time}
-})
+}) // if target exchange is an topic or fanout exchange, only the first reply will be accepted.
 ```
 
 ## events
