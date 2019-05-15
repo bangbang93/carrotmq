@@ -24,6 +24,9 @@ export interface IRPCResult {
   fields: object
 }
 
+/**
+ * @deprecated Use class Context instead
+ */
 export interface IContext {
   message: any,
   fields: any,
@@ -41,7 +44,7 @@ export interface IContext {
 }
 
 export interface IConsumer {
-  (this: Context, data: any, ctx: IContext): any
+  (this: Context, data: any, ctx: Context): any
 }
 
 export type MessageType = any|boolean|number|string|Buffer

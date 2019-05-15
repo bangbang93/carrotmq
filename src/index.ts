@@ -5,7 +5,7 @@ import {EventEmitter} from 'events'
 import * as os from 'os'
 import {Context} from './context'
 import {ValidationError} from './lib/ValidationError'
-import {ICarrotMQMessage, IConfig, IConsumer, IContext, IRPCResult, MessageType} from './types'
+import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MessageType} from './types'
 import rabbitmqSchema = require('rabbitmq-schema')
 
 const defaultConfig: IConfig = {
@@ -273,7 +273,7 @@ export class CarrotMQ extends EventEmitter {
     let rpcResult: IRPCResult
 
     try {
-      const {data, ctx} = await new Bluebird<{data, ctx: IContext}>((resolve) => {
+      const {data, ctx} = await new Bluebird<{data, ctx: Context}>((resolve) => {
         this.rpcListener.set(correlationId, resolve)
       })
         .timeout(this.config.rpcTimeout, 'rpc timeout')
@@ -357,7 +357,7 @@ export class CarrotMQ extends EventEmitter {
     })
 
     try {
-      const {data, ctx} = await new Bluebird<{data, ctx: IContext}>((resolve) => {
+      const {data, ctx} = await new Bluebird<{data, ctx: Context}>((resolve) => {
         this.rpcListener.set(correlationId, resolve)
       })
         .timeout(this.config.rpcTimeout, 'rpc timeout')
