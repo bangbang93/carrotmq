@@ -112,8 +112,10 @@
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#config" class="tsd-kind-icon">config</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#connection" class="tsd-kind-icon">connection</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_index_.carrotmq.html#consumers" class="tsd-kind-icon">consumers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#decodecontent" class="tsd-kind-icon">decode<wbr>Content</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#isconnecting" class="tsd-kind-icon">is<wbr>Connecting</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_index_.carrotmq.html#isfirstconnection" class="tsd-kind-icon">is<wbr>First<wbr>Connection</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#makecontent" class="tsd-kind-icon">make<wbr>Content</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#manualclose" class="tsd-kind-icon">manual<wbr>Close</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.carrotmq.html#ready" class="tsd-kind-icon">ready</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_index_.carrotmq.html#readypromise" class="tsd-kind-icon">ready<wbr>Promise</a></li>
@@ -176,7 +178,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L45">index.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L49">index.ts:49</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -214,7 +216,7 @@
 					<div class="tsd-signature tsd-kind-icon">app<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L36">index.ts:36</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L37">index.ts:37</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -224,7 +226,7 @@
 					<div class="tsd-signature tsd-kind-icon">channels<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Channel</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Set&lt;Channel&gt;()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L37">index.ts:37</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L38">index.ts:38</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -234,7 +236,7 @@
 					<div class="tsd-signature tsd-kind-icon">config<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_.iconfig.html" class="tsd-signature-type">IConfig</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L32">index.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L33">index.ts:33</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -244,7 +246,7 @@
 					<div class="tsd-signature tsd-kind-icon">connection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Connection</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L33">index.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L34">index.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -254,7 +256,17 @@
 					<div class="tsd-signature tsd-kind-icon">consumers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.iconsumer.html" class="tsd-signature-type">IConsumer</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Map&lt;string, Set&lt;IConsumer&gt;&gt;()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L45">index.ts:45</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L49">index.ts:49</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="decodecontent" class="tsd-anchor"></a>
+					<h3>decode<wbr>Content</h3>
+					<div class="tsd-signature tsd-kind-icon">decode<wbr>Content<span class="tsd-signature-symbol">:</span> <a href="../modules/_index_.html#decodecontent" class="tsd-signature-type">decodeContent</a><span class="tsd-signature-symbol"> =&nbsp;decodeContent</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L40">index.ts:40</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -264,7 +276,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Connecting<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L35">index.ts:35</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L36">index.ts:36</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -274,7 +286,17 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>First<wbr>Connection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L41">index.ts:41</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L45">index.ts:45</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="makecontent" class="tsd-anchor"></a>
+					<h3>make<wbr>Content</h3>
+					<div class="tsd-signature tsd-kind-icon">make<wbr>Content<span class="tsd-signature-symbol">:</span> <a href="../modules/_types_.html#makecontentfunction" class="tsd-signature-type">MakeContentFunction</a><span class="tsd-signature-symbol"> =&nbsp;makeContent</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L41">index.ts:41</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -284,7 +306,7 @@
 					<div class="tsd-signature tsd-kind-icon">manual<wbr>Close<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L39">index.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L43">index.ts:43</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -294,7 +316,7 @@
 					<div class="tsd-signature tsd-kind-icon">ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L34">index.ts:34</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L35">index.ts:35</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -304,7 +326,7 @@
 					<div class="tsd-signature tsd-kind-icon">ready<wbr>Promise<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L42">index.ts:42</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L46">index.ts:46</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -314,7 +336,7 @@
 					<div class="tsd-signature tsd-kind-icon">rpc<wbr>Listener<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Map&lt;string, Function&gt;()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L44">index.ts:44</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L48">index.ts:48</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -324,7 +346,7 @@
 					<div class="tsd-signature tsd-kind-icon">rpc<wbr>Queues<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;new Set&lt;string&gt;()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L43">index.ts:43</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L47">index.ts:47</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -334,7 +356,7 @@
 					<div class="tsd-signature tsd-kind-icon">schema<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">rabbitmqSchema</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L31">index.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L32">index.ts:32</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -344,7 +366,7 @@
 					<div class="tsd-signature tsd-kind-icon">uri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Connect</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L30">index.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L31">index.ts:31</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -354,7 +376,7 @@
 					<div class="tsd-signature tsd-kind-icon">Validation<wbr>Error<span class="tsd-signature-symbol">:</span> <a href="_lib_validationerror_.validationerror.html" class="tsd-signature-type">ValidationError</a><span class="tsd-signature-symbol"> =&nbsp;ValidationError</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L28">index.ts:28</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L29">index.ts:29</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -365,7 +387,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from EventEmitter.defaultMaxListeners</p>
 						<ul>
-							<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:8</li>
+							<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1011</li>
 						</ul>
 					</aside>
 				</section>
@@ -375,7 +397,7 @@
 					<div class="tsd-signature tsd-kind-icon">schema<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">rabbitmqSchema</span><span class="tsd-signature-symbol"> =&nbsp;rabbitmqSchema</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L27">index.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L28">index.ts:28</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -385,7 +407,7 @@
 					<div class="tsd-signature tsd-kind-icon">validation<wbr>Error<span class="tsd-signature-symbol">:</span> <a href="_lib_validationerror_.validationerror.html" class="tsd-signature-type">ValidationError</a><span class="tsd-signature-symbol"> =&nbsp;ValidationError</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L29">index.ts:29</a></li>
+							<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L30">index.ts:30</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -404,7 +426,7 @@
 								<p>Inherited from EventEmitter.addListener</p>
 								<p>Overrides EventEmitter.addListener</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:10</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1013</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -448,7 +470,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L434">index.ts:434</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L438">index.ts:438</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -474,7 +496,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L422">index.ts:422</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L426">index.ts:426</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -491,7 +513,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L415">index.ts:415</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L419">index.ts:419</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -513,7 +535,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L68">index.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L72">index.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -535,7 +557,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L393">index.ts:393</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L397">index.ts:397</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -563,7 +585,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L405">index.ts:405</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L409">index.ts:409</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ConfirmChannel</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -582,7 +604,7 @@
 								<p>Inherited from EventEmitter.emit</p>
 								<p>Overrides EventEmitter.emit</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:22</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1025</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -610,7 +632,7 @@
 								<p>Inherited from EventEmitter.eventNames</p>
 								<p>Overrides EventEmitter.eventNames</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:23</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1026</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">symbol</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -629,7 +651,7 @@
 								<p>Inherited from EventEmitter.getMaxListeners</p>
 								<p>Overrides EventEmitter.getMaxListeners</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:19</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1022</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -648,7 +670,7 @@
 								<p>Inherited from EventEmitter.listenerCount</p>
 								<p>Overrides EventEmitter.listenerCount</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:24</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1027</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -673,7 +695,7 @@
 								<p>Inherited from EventEmitter.listeners</p>
 								<p>Overrides EventEmitter.listeners</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:20</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1023</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -698,7 +720,7 @@
 								<p>Inherited from EventEmitter.off</p>
 								<p>Overrides EventEmitter.off</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:16</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1019</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -744,7 +766,7 @@
 								<p>Inherited from EventEmitter.on</p>
 								<p>Overrides EventEmitter.on</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:11</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1014</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -790,7 +812,7 @@
 								<p>Inherited from EventEmitter.once</p>
 								<p>Overrides EventEmitter.once</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:12</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1015</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -836,7 +858,7 @@
 								<p>Inherited from EventEmitter.prependListener</p>
 								<p>Overrides EventEmitter.prependListener</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:13</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1016</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -882,7 +904,7 @@
 								<p>Inherited from EventEmitter.prependOnceListener</p>
 								<p>Overrides EventEmitter.prependOnceListener</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:14</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1017</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -926,7 +948,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L217">index.ts:217</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L221">index.ts:221</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -969,7 +991,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L118">index.ts:118</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L122">index.ts:122</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1011,7 +1033,7 @@
 								<p>Inherited from EventEmitter.rawListeners</p>
 								<p>Overrides EventEmitter.rawListeners</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:21</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1024</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1036,7 +1058,7 @@
 								<p>Inherited from EventEmitter.removeAllListeners</p>
 								<p>Overrides EventEmitter.removeAllListeners</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:17</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1020</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1061,7 +1083,7 @@
 								<p>Inherited from EventEmitter.removeListener</p>
 								<p>Overrides EventEmitter.removeListener</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:15</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1018</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1105,7 +1127,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L443">index.ts:443</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L447">index.ts:447</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1131,7 +1153,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L448">index.ts:448</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L452">index.ts:452</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -1148,7 +1170,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L314">index.ts:314</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L318">index.ts:318</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1188,7 +1210,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L238">index.ts:238</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L242">index.ts:242</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1231,7 +1253,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/833ef06/src/index.ts#L190">index.ts:190</a></li>
+									<li>Defined in <a href="https://github.com/bangbang93/carrotmq/blob/554755f/src/index.ts#L194">index.ts:194</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1273,7 +1295,7 @@
 								<p>Inherited from EventEmitter.setMaxListeners</p>
 								<p>Overrides EventEmitter.setMaxListeners</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:18</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1021</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1297,7 +1319,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from EventEmitter.listenerCount</p>
 								<ul>
-									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/events.d.ts:7</li>
+									<li>Defined in /home/travis/build/bangbang93/carrotmq/node_modules/@types/node/index.d.ts:1010</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1368,10 +1390,16 @@
 								<a href="_index_.carrotmq.html#consumers" class="tsd-kind-icon">consumers</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_index_.carrotmq.html#decodecontent" class="tsd-kind-icon">decode<wbr>Content</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#isconnecting" class="tsd-kind-icon">is<wbr>Connecting</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="_index_.carrotmq.html#isfirstconnection" class="tsd-kind-icon">is<wbr>First<wbr>Connection</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_index_.carrotmq.html#makecontent" class="tsd-kind-icon">make<wbr>Content</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_index_.carrotmq.html#manualclose" class="tsd-kind-icon">manual<wbr>Close</a>
