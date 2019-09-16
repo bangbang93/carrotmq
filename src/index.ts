@@ -3,9 +3,10 @@ import {Channel, ConfirmChannel, Connection, Options, Replies} from 'amqplib'
 import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
 import * as os from 'os'
+import {decode} from 'punycode'
 import {Context} from './context'
 import {ValidationError} from './lib/ValidationError'
-import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MessageType} from './types'
+import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MakeContentFunction, MessageType} from './types'
 import rabbitmqSchema = require('rabbitmq-schema')
 
 const defaultConfig: IConfig = {
@@ -35,6 +36,9 @@ export class CarrotMQ extends EventEmitter {
   public isConnecting: boolean = false
   public appId: string
   public readonly channels = new Set<Channel>()
+
+  public decodeContent = decodeContent
+  public makeContent: MakeContentFunction = makeContent
 
   public manualClose: boolean
 
@@ -132,7 +136,7 @@ export class CarrotMQ extends EventEmitter {
         channel,
       })
 
-      const content = decodeContent({
+      const content = this.decodeContent({
         content: message.content,
         contentType: message.properties.contentType,
       })
@@ -198,7 +202,7 @@ export class CarrotMQ extends EventEmitter {
         throw new ValidationError(message, null, queue, e)
       }
     }
-    const {content, contentType} = makeContent(message)
+    const {content, contentType} = this.makeContent(message, {queue})
     options.contentType = contentType
     options.appId = this.appId
     const channel = await this.createChannel(`sendToQueue:${queue}`)
@@ -219,7 +223,7 @@ export class CarrotMQ extends EventEmitter {
     if (this.schema && this.schema.getExchangeByName(exchange)) {
       this.schema.validateMessage(exchange, routingKey, message)
     }
-    const {content, contentType} = makeContent(message)
+    const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     options.contentType = contentType
     options.appId = this.appId
     const channel = await this.createChannel(`publish:${exchange}`)
@@ -243,7 +247,7 @@ export class CarrotMQ extends EventEmitter {
       this.schema.validateMessage(exchange, routingKey, message)
     }
     const channel = await this.connection.createChannel()
-    const {content, contentType} = makeContent(message)
+    const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     const correlationId = Math.random().toString(16).substr(2)
     const callbackQueue = this.config.callbackQueue.queue
     options.contentType = contentType
@@ -316,7 +320,7 @@ export class CarrotMQ extends EventEmitter {
     if (this.schema && this.schema.getQueueByName(queue)) {
       this.schema.validateMessage(queue, message)
     }
-    const {content, contentType} = makeContent(message)
+    const {content, contentType} = this.makeContent(message, {queue})
     const channel    = await this.createChannel(`rpc:${queue}`)
     if (!callbackQueue) {
       if (this.config.callbackQueue) {

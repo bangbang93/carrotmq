@@ -54,6 +54,8 @@ export interface ICarrotMQMessage {
   contentType: string
 }
 
+export type MakeContentFunction = (message: any, info: {queue?: string; exchange?: string; routingKey?: string}) => ICarrotMQMessage
+
 declare module 'amqplib' {
   interface Channel {
     reason: string
