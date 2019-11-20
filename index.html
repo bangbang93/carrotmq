@@ -64,7 +64,9 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<h1 id="carrotmq">carrotmq</h1>
+				<a href="#carrotmq" id="carrotmq" style="color: inherit; text-decoration: none;">
+					<h1>carrotmq</h1>
+				</a>
 				<p>a much easy way to use rabbitmq</p>
 				<p><a href="https://blog.bangbang93.com/2016/03/29/carrotmq%e4%b8%ad%e6%96%87%e6%96%87%e6%a1%a3.moe">中文文档</a></p>
 				<p><a href="https://travis-ci.org/bangbang93/carrotmq"><img src="https://travis-ci.org/bangbang93/carrotmq.svg?branch=master" alt="Build Status"></a>
@@ -73,9 +75,13 @@
 					<a href="https://david-dm.org/bangbang93/carrotmq"><img src="https://img.shields.io/david/bangbang93/carrotmq.svg?style=flat-square" alt="Dependencies"></a>
 					<a href="https://nodei.co/npm/carrotmq/"><img src="https://nodei.co/npm/carrotmq.png?downloads=true&downloadRank=true" alt="NPM"></a>
 				<a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/bangbang93/carrotmq.svg" alt="Greenkeeper badge"></a></p>
-				<h2 id="apidoc">APIDOC</h2>
+				<a href="#apidoc" id="apidoc" style="color: inherit; text-decoration: none;">
+					<h2>APIDOC</h2>
+				</a>
 				<p><a href="https://bangbang93.github.io/carrotmq">documentation</a></p>
-				<h2 id="usage">usage</h2>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>usage</h2>
+				</a>
 				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> {CarrotMQ} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'carrotmq'</span>);
 <span class="hljs-comment">//var rabbitmqSchema = require('rabbitmq-schema');</span>
 <span class="hljs-keyword">const</span> rabbitmqSchema = CarrotMQ.schema;
@@ -110,7 +116,9 @@ mq.queue(<span class="hljs-string">'fooQueue'</span>, <span class="hljs-keyword"
 
 mq.sendToQueue(<span class="hljs-string">'queue'</span>, {<span class="hljs-attr">msg</span>: <span class="hljs-string">'message'</span>});
 mq.publish(<span class="hljs-string">'exchange'</span>, <span class="hljs-string">'foo.bar.key'</span>, {<span class="hljs-attr">msg</span>: <span class="hljs-string">'hello world!'</span>});</code></pre>
-				<h2 id="message-validation">Message Validation</h2>
+				<a href="#message-validation" id="message-validation" style="color: inherit; text-decoration: none;">
+					<h2>Message Validation</h2>
+				</a>
 				<p><code>messageSchema</code> defines as json-schema on queue. Message will be validate when they comes.
 					If failed while validation, a <code>validateError:${queue}</code> event will emit.
 				If no listener attached on this event, this fail will be silent ignore and message will be acked.</p>
@@ -158,7 +166,9 @@ mq.on(<span class="hljs-string">'validationError:fooQueue'</span>, <span class="
   err.channel; <span class="hljs-comment">//queue channel</span>
   err.content; <span class="hljs-comment">//raw content (Buffer)</span>
 })</code></pre>
-				<h2 id="rpc">RPC</h2>
+				<a href="#rpc" id="rpc" style="color: inherit; text-decoration: none;">
+					<h2>RPC</h2>
+				</a>
 				<pre><code class="language-javascript">mq.rpc(<span class="hljs-string">'queue'</span>, {<span class="hljs-attr">data</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>})
 .then(<span class="hljs-function">(<span class="hljs-params">reply</span>)=&gt;</span>{
   reply.ack();
@@ -172,7 +182,9 @@ mq.on(<span class="hljs-string">'validationError:fooQueue'</span>, <span class="
 })</code></pre>
 				<p>Or </p>
 				<pre><code class="language-javascript">mq.rpc(<span class="hljs-string">'carrotmq.rpc'</span>, {<span class="hljs-attr">data</span>: <span class="hljs-string">'foo'</span>}, <span class="hljs-string">'carrotmq.rpc.callback'</span>) </code></pre>
-				<h2 id="rpc-over-exchange">RPC Over Exchange</h2>
+				<a href="#rpc-over-exchange" id="rpc-over-exchange" style="color: inherit; text-decoration: none;">
+					<h2>RPC Over Exchange</h2>
+				</a>
 				<pre><code class="language-javascript">
 <span class="hljs-comment">//{</span>
 <span class="hljs-comment">//    routingPattern: 'rpc.#',</span>
@@ -193,32 +205,50 @@ app.rpcExchange(<span class="hljs-string">'exchange0'</span>, <span class="hljs-
   reply.ack();
   <span class="hljs-built_in">console</span>.log(reply.data)<span class="hljs-comment">//{time: time}</span>
 }) <span class="hljs-comment">// if target exchange is an topic or fanout exchange, only the first reply will be accepted.</span></code></pre>
-				<h2 id="events">events</h2>
-				<h3 id="ready">ready</h3>
+				<a href="#events" id="events" style="color: inherit; text-decoration: none;">
+					<h2>events</h2>
+				</a>
+				<a href="#ready" id="ready" style="color: inherit; text-decoration: none;">
+					<h3>ready</h3>
+				</a>
 				<p>emit after connection established</p>
 				<pre><code class="language-javascript">mq.on(<span class="hljs-string">'ready'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{});</code></pre>
-				<h3 id="error">error</h3>
+				<a href="#error" id="error" style="color: inherit; text-decoration: none;">
+					<h3>error</h3>
+				</a>
 				<p>emit when something happened</p>
 				<pre><code class="language-javascript">mq.on(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>)</span>{});</code></pre>
-				<h3 id="message">message</h3>
+				<a href="#message" id="message" style="color: inherit; text-decoration: none;">
+					<h3>message</h3>
+				</a>
 				<p>emit when message come</p>
 				<pre><code class="language-javascript">mq.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>)</span>{
   data.channel; <span class="hljs-comment">//channel object</span>
   data.queue   <span class="hljs-comment">//queue name</span>
   data.message  <span class="hljs-comment">//message object</span>
 })</code></pre>
-				<h3 id="close">close</h3>
+				<a href="#close" id="close" style="color: inherit; text-decoration: none;">
+					<h3>close</h3>
+				</a>
 				<p>emit when connection close</p>
 				<pre><code class="language-js">mq.on(<span class="hljs-string">'close'</span>, () =&gt; setTimeout(mq.connect(), <span class="hljs-number">1000</span>));</code></pre>
-				<h2 id="upgrade">upgrade</h2>
-				<h3 id="v4-to-v5">V4 to V5</h3>
+				<a href="#upgrade" id="upgrade" style="color: inherit; text-decoration: none;">
+					<h2>upgrade</h2>
+				</a>
+				<a href="#v4-to-v5" id="v4-to-v5" style="color: inherit; text-decoration: none;">
+					<h3>V4 to V5</h3>
+				</a>
 				<p>Because of rewritten in TypeScript, some export has changed
 				before:</p>
 				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> CarrotMQ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'carrotmq'</span>)</code></pre>
 				<p>after:</p>
 				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> {CarrotMQ} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'carrotmq'</span>)</code></pre>
-				<h3 id="v2-to-v3">V2 to V3</h3>
-				<h4 id="breaking-change">breaking change</h4>
+				<a href="#v2-to-v3" id="v2-to-v3" style="color: inherit; text-decoration: none;">
+					<h3>V2 to V3</h3>
+				</a>
+				<a href="#breaking-change" id="breaking-change" style="color: inherit; text-decoration: none;">
+					<h4>breaking change</h4>
+				</a>
 				<ul>
 					<li><p>mq.rpc() and mq.rpcExchange() method remove the 4th consumer argument.And using Promise</p>
 						<p>used to</p>
@@ -249,16 +279,16 @@ app.rpcExchange(<span class="hljs-string">'exchange0'</span>, <span class="hljs-
 						<a href="globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_context_.html">"context"</a>
+						<a href="modules/_context_.html">&quot;context&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_index_.html">"index"</a>
+						<a href="modules/_index_.html">&quot;index&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_validationerror_.html">"lib/<wbr>Validation<wbr>Error"</a>
+						<a href="modules/_lib_validationerror_.html">&quot;lib/<wbr>Validation<wbr>Error&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_types_.html">"types"</a>
+						<a href="modules/_types_.html">&quot;types&quot;</a>
 					</li>
 				</ul>
 			</nav>
@@ -281,6 +311,7 @@ app.rpcExchange(<span class="hljs-string">'exchange0'</span>, <span class="hljs-
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
@@ -329,7 +360,7 @@ app.rpcExchange(<span class="hljs-string">'exchange0'</span>, <span class="hljs-
 	</div>
 </footer>
 <div class="container tsd-generator">
-	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
 <script src="assets/js/main.js"></script>
