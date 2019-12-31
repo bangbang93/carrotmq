@@ -254,6 +254,12 @@ export class CarrotMQ extends EventEmitter {
     options.appId = this.appId
     options.replyTo = callbackQueue
     options.correlationId = correlationId
+
+    const {data, ctx} = await new Bluebird<{data, ctx: Context}>((resolve) => {
+      this.rpcListener.set(correlationId, resolve)
+    })
+      .timeout(this.config.rpcTimeout, 'rpc timeout')
+
     if (!this.rpcQueues.has(callbackQueue)) {
       this.rpcQueues.add(callbackQueue)
       await this.queue(callbackQueue, async (data, ctx) => {
@@ -277,10 +283,6 @@ export class CarrotMQ extends EventEmitter {
     let rpcResult: IRPCResult
 
     try {
-      const {data, ctx} = await new Bluebird<{data, ctx: Context}>((resolve) => {
-        this.rpcListener.set(correlationId, resolve)
-      })
-        .timeout(this.config.rpcTimeout, 'rpc timeout')
       const rpcResult: IRPCResult = {
         _ack: false,
         data,
