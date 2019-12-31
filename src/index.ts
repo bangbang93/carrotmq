@@ -265,8 +265,8 @@ export class CarrotMQ extends EventEmitter {
           err['routingKey'] = routingKey
           err['data'] = data
           err['queue'] = callbackQueue
-          this.emit('error', err)
           await ctx.ack()
+          this.emit('error', err)
         } else {
           listener({data, ctx})
         }
@@ -344,8 +344,8 @@ export class CarrotMQ extends EventEmitter {
           err['correlationId'] = correlationId
           err['data'] = data
           err['queue'] = callbackQueue
-          this.emit('error', err)
           await ctx.ack()
+          this.emit('error', err)
         } else {
           listener({data, ctx})
         }
