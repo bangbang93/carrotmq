@@ -459,6 +459,8 @@ export class CarrotMQ extends EventEmitter {
 
 export default CarrotMQ
 
+export {Context, ValidationError, IConfig}
+
 function makeContent(content: MessageType): ICarrotMQMessage {
   switch (true) {
     case Buffer.isBuffer(content):
