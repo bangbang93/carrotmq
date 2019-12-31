@@ -3,7 +3,6 @@ import {Channel, ConfirmChannel, Connection, Options, Replies} from 'amqplib'
 import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
 import * as os from 'os'
-import {decode} from 'punycode'
 import {Context} from './context'
 import {ValidationError} from './lib/ValidationError'
 import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MakeContentFunction, MessageType} from './types'
@@ -249,17 +248,11 @@ export class CarrotMQ extends EventEmitter {
     const channel = await this.connection.createChannel()
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     const correlationId = Math.random().toString(16).substr(2)
-    const callbackQueue = this.config.callbackQueue.queue
+    const callbackQueue = this.config.callbackQueue.queue + '-exchange'
     options.contentType = contentType
     options.appId = this.appId
     options.replyTo = callbackQueue
     options.correlationId = correlationId
-
-    const {data, ctx} = await new Bluebird<{data, ctx: Context}>((resolve) => {
-      this.rpcListener.set(correlationId, resolve)
-    })
-      .timeout(this.config.rpcTimeout, 'rpc timeout')
-
     if (!this.rpcQueues.has(callbackQueue)) {
       this.rpcQueues.add(callbackQueue)
       await this.queue(callbackQueue, async (data, ctx) => {
@@ -283,6 +276,10 @@ export class CarrotMQ extends EventEmitter {
     let rpcResult: IRPCResult
 
     try {
+      const {data, ctx} = await new Bluebird<{data, ctx: Context}>((resolve) => {
+        this.rpcListener.set(correlationId, resolve)
+      })
+        .timeout(this.config.rpcTimeout, 'rpc timeout')
       const rpcResult: IRPCResult = {
         _ack: false,
         data,
