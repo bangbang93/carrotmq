@@ -30,7 +30,7 @@
   "homepage": "https://github.com/bangbang93/carrotmq#readme",
   "dependencies": {
     "@types/amqplib": "^0.5.13",
-    "@types/bluebird": "^3.5.18",
+    "@types/bluebird": "^3.5.30",
     "@types/node": "^10.1.2",
     "amqplib": "^0.5.5",
     "bluebird": "^3.7.2",
