@@ -14,14 +14,14 @@ const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/${RAB
 
 let app: CarrotMQ;
 
-let date = new Date();
+const date = new Date();
 
 describe('no schema queue', function () {
   this.timeout(5000);
 
   beforeEach('setup without schema', async function () {
     this.timeout(5000)
-    app = new CarrotMQ(uri, null, {
+    app = new CarrotMQ(uri, {
       callbackQueue: {
         queue: 'carrotmq.test.callback',
         options: {
@@ -39,9 +39,9 @@ describe('no schema queue', function () {
   })
 
   it('queue', function (done) {
-    app.queue('fooQueue', function (data) {
+    app.queue('fooQueue', function (data, ctx) {
       try {
-        this.ack();
+        ctx.ack();
         Date.parse(data.date).should.equal(date.valueOf());
         done();
       } catch (e) {
@@ -81,7 +81,7 @@ describe('no schema queue', function () {
       await Bluebird.delay(~~(Math.random() * 20 + 1))
       await ctx.reply(data)
     })
-    await Bluebird.map(new Array(1000).fill(0), async (e, i) => {
+    await Bluebird.map(new Array(100).fill(0), async (e, i) => {
       const res = await app.rpc('carrotmq.test.callback', i)
       res.data.should.eql(i)
       process.stdout.write(res.data + ',')

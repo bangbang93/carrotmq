@@ -1,6 +1,6 @@
 import CarrotMQ from '../src'
 
-const app = new CarrotMQ('amqp://guest:guest@lo-srv-0.s.chipwing.com', null, {
+const app = new CarrotMQ('amqp://guest:guest@lo-srv-0.s.chipwing.com', {
   callbackQueue: {
     queue: 'carrotmq@' + process.pid,
     options:{

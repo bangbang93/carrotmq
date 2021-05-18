@@ -21,19 +21,7 @@ const {CarrotMQ} = require('carrotmq');
 //var rabbitmqSchema = require('rabbitmq-schema');
 const rabbitmqSchema = CarrotMQ.schema;
 
-//see https://www.npmjs.com/package/rabbitmq-schema
-const schema = new rabbitmqSchema({
-    exchange: 'exchange0',
-    type: 'topic',
-    bindings: [{
-      routingPattern: 'foo.bar.#',
-      destination: {
-        queue: 'fooQueue',
-        messageSchema: {}
-      }
-    }]
-});
-const mq = new CarrotMQ('amqp://localhost', schema);
+const mq = new CarrotMQ('amqp://localhost');
 
 const publisher = new CarrotMQ('amqp://localhost'); //also can use without schema
 
@@ -53,57 +41,6 @@ mq.sendToQueue('queue', {msg: 'message'});
 mq.publish('exchange', 'foo.bar.key', {msg: 'hello world!'});
 ```
 
-## Message Validation
-`messageSchema` defines as json-schema on queue. Message will be validate when they comes.
-If failed while validation, a `validateError:${queue}` event will emit.
-If no listener attached on this event, this fail will be silent ignore and message will be acked.
-```js
-const schema = new rabbitmqSchema({
-    exchange: 'exchange0',
-    type: 'topic',
-    bindings: [{
-      routingPattern: 'foo.bar.#',
-      destination: {
-        queue: 'fooQueue',
-        messageSchema: {
-         title: 'push-target',
-         type: 'object',
-         properties: {
-           userIds: {
-             type: 'array',
-           },
-           message: {
-             type: 'object',
-             properties: {
-               text: {
-                 type: 'string',
-               },
-               title: {
-                 type: 'string',
-               }
-             },
-             required: ['text', 'title'],
-           },
-         },
-         required: ['userIds', 'message'],
-       }
-      }
-    }]
-});
-const mq = new CarrotMQ('amqp://localhost', schema);
-mq.queue('fooQueue', function(data) {
-  console.log(data);
-});
-mq.on('validationError:fooQueue', function(err) {
-  const ValidateError = require(ValidationError);
-  err instanceof ValidateError === true;
-  console.error(err);
-  err.channel.ack(err.content);
-  err.channel; //queue channel
-  err.content; //raw content (Buffer)
-})
-```
-
 ## RPC
 ```javascript
 mq.rpc('queue', {data: new Date})
@@ -114,7 +51,7 @@ mq.rpc('queue', {data: new Date})
 ```
 If you prefer to use named queue rather than temp queue, you can set in config like 
 ```javascript
-const mq = new CarrotMQ('amqp://localhost', null, {
+const mq = new CarrotMQ('amqp://localhost', {
   callbackQueue: {
     queue: 'carrotmq.rpc.callback'
   }

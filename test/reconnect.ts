@@ -4,7 +4,7 @@ const {RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST, RABBITMQ_VHOST = ''} = p
 
 const uri = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/${RABBITMQ_VHOST}`;
 
-const app = new CarrotMQ(uri, null, {
+const app = new CarrotMQ(uri, {
   reconnect: {
     times: 10,
     timeout: 1000,

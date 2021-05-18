@@ -4,9 +4,7 @@ import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
 import * as os from 'os'
 import {Context} from './context'
-import {ValidationError} from './lib/ValidationError'
 import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MakeContentFunction, MessageType} from './types'
-import rabbitmqSchema = require('rabbitmq-schema')
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -23,12 +21,6 @@ const defaultConfig: IConfig = {
  * @extends EventEmitter
  */
 export class CarrotMQ extends EventEmitter {
-
-  public static schema: rabbitmqSchema = rabbitmqSchema
-  public static ValidationError = ValidationError
-  public static validationError = ValidationError
-  public uri: string | Options.Connect
-  public schema: rabbitmqSchema | null
   public config: IConfig
   public connection: Connection
   public ready: boolean
@@ -50,16 +42,13 @@ export class CarrotMQ extends EventEmitter {
   /**
    * constructor
    * @param {string} uri amqp url
-   * @param {rabbitmqSchema|null} [schema] rabbitmq-schema
    * @param {IConfig} [config] config
    */
-  constructor(uri: string | Options.Connect, schema?: rabbitmqSchema, config: IConfig = defaultConfig) {
+  constructor(
+    public readonly uri: string | Options.Connect,
+    config: IConfig = defaultConfig,
+  ) {
     super()
-    if (schema && !(schema instanceof rabbitmqSchema)) {
-      throw new TypeError('arguments must be rabbitmqSchema')
-    }
-    this.uri    = uri
-    this.schema = schema
     this.config = {...defaultConfig, ...config}
     this.appId = this.config.appId
   }
@@ -75,25 +64,6 @@ export class CarrotMQ extends EventEmitter {
     connection.on('close', onclose.bind(this))
     connection.on('error', (err) => this.emit('error', err))
     const channel = await connection.createChannel()
-    if (this.schema) {
-      const exchanges = this.schema.getExchanges()
-      for (const exchange of exchanges) {
-        await channel.assertExchange(exchange.exchange, exchange.type, exchange.options)
-        const bindings = exchange.getDirectBindings()
-        for (const binding of bindings) {
-          const dest = binding.destination
-          const src  = binding.source
-          if (dest.queue) {
-            await channel.assertQueue(dest.queue, dest.options)
-            await channel.bindQueue(dest.queue, src.exchange, binding.routingPattern)
-          }
-          if (dest.exchange) {
-            await channel.assertExchange(dest.exchange, dest.type, dest.options)
-            await channel.bindExchange(dest.exchange, src.exchange, binding.routingPattern)
-          }
-        }
-      }
-    }
     if (this.config.callbackQueue) {
       await channel.assertQueue(this.config.callbackQueue.queue, this.config.callbackQueue.options)
     }
@@ -122,9 +92,7 @@ export class CarrotMQ extends EventEmitter {
     await this.awaitReady()
     this.addQueueConsumer(queue, consumer)
     const channel = await this.createChannel(`queue:${queue}`)
-    if (!queue.startsWith('amq.')
-      && (!this.schema || (this.schema && !this.schema.getQueueByName(queue)))
-      && this.config.callbackQueue && queue !== this.config.callbackQueue.queue) {
+    if (!queue.startsWith('amq.') && queue !== this.config.callbackQueue?.queue) {
       await channel.assertQueue(queue, opts)
     }
     let consume: Replies.Consume
@@ -144,23 +112,6 @@ export class CarrotMQ extends EventEmitter {
       ctx.once('cancel', () => {
         this.removeQueueConsumer(queue, consumer)
       })
-
-      if (this.schema && this.schema.getQueueByName(queue)) {
-        try {
-          this.schema.validateMessage(queue, ctx.content)
-        } catch (e) {
-          const err = new ValidationError(message, channel, queue, e)
-          if (this.listenerCount(`validationError:${queue}`) !== 0) {
-            return this.emit(`validationError:${queue}`, err)
-          }
-          if (message.properties.replyTo) {
-            return ctx.reply({err})
-              .then(() => ctx.ack())
-          } else {
-            return ctx.ack()
-          }
-        }
-      }
 
       try {
         const result = consumer.call(ctx, ctx.content, ctx)
@@ -193,14 +144,6 @@ export class CarrotMQ extends EventEmitter {
   public async sendToQueue(queue: string, message: MessageType,
                     options: Options.Publish & {skipValidate?: boolean} = {}): Promise<void> {
     await this.awaitReady()
-    const skipValidate = options ? options.skipValidate : false
-    if (!skipValidate && this.schema && this.schema.getQueueByName(queue)) {
-      try {
-        this.schema.validateMessage(queue, message)
-      } catch (e) {
-        throw new ValidationError(message, null, queue, e)
-      }
-    }
     const {content, contentType} = this.makeContent(message, {queue})
     options.contentType = contentType
     options.appId = this.appId
@@ -219,9 +162,6 @@ export class CarrotMQ extends EventEmitter {
    */
   public async publish(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}) {
     await this.awaitReady()
-    if (this.schema && this.schema.getExchangeByName(exchange)) {
-      this.schema.validateMessage(exchange, routingKey, message)
-    }
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     options.contentType = contentType
     options.appId = this.appId
@@ -242,9 +182,6 @@ export class CarrotMQ extends EventEmitter {
                     options: Options.Publish = {}): Promise<IRPCResult> {
     await this.awaitReady()
 
-    if (this.schema && this.schema.getExchangeByName(exchange)) {
-      this.schema.validateMessage(exchange, routingKey, message)
-    }
     const channel = await this.connection.createChannel()
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     const correlationId = Math.random().toString(16).substr(2)
@@ -317,9 +254,6 @@ export class CarrotMQ extends EventEmitter {
    */
   public async rpc(queue: string, message: MessageType, callbackQueue?: string): Promise<IRPCResult> {
     await this.awaitReady()
-    if (this.schema && this.schema.getQueueByName(queue)) {
-      this.schema.validateMessage(queue, message)
-    }
     const {content, contentType} = this.makeContent(message, {queue})
     const channel    = await this.createChannel(`rpc:${queue}`)
     if (!callbackQueue) {
@@ -461,7 +395,7 @@ export class CarrotMQ extends EventEmitter {
 
 export default CarrotMQ
 
-export {Context, ValidationError, IConfig}
+export {Context, IConfig}
 
 function makeContent(content: MessageType): ICarrotMQMessage {
   switch (true) {
