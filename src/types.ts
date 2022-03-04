@@ -1,7 +1,6 @@
+import {Channel, Options} from 'amqplib'
 import {Context} from './context'
 import CarrotMQ from './index'
-import {Channel, Options} from 'amqplib'
-import {Replies} from 'amqplib/properties'
 
 export interface IConfig {
   appId?: string
@@ -43,11 +42,9 @@ export interface IContext {
   cancel(): Promise<void>
 }
 
-export interface IConsumer {
-  (this: Context, data: any, ctx: Context): any
-}
+export type IConsumer = (this: Context, data: any, ctx: Context) => any
 
-export type MessageType = any|boolean|number|string|Buffer
+export type MessageType = any | boolean | number | string | Buffer
 
 export interface ICarrotMQMessage {
   content: MessageType,
@@ -55,6 +52,10 @@ export interface ICarrotMQMessage {
 }
 
 export type MakeContentFunction = (message: any, info: {queue?: string; exchange?: string; routingKey?: string}) => ICarrotMQMessage
+
+export interface QueueOptions extends Options.AssertQueue {
+  channel?: Channel
+}
 
 declare module 'amqplib' {
   interface Channel {

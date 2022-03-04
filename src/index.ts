@@ -1,10 +1,9 @@
-import * as amqplib from 'amqplib'
-import {Channel, ConfirmChannel, Connection, Options, Replies} from 'amqplib'
+import {Channel, ConfirmChannel, connect, Connection, Options, Replies} from 'amqplib'
 import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
 import * as os from 'os'
 import {Context} from './context'
-import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MakeContentFunction, MessageType} from './types'
+import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MakeContentFunction, MessageType, QueueOptions} from './types'
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -36,7 +35,7 @@ export class CarrotMQ extends EventEmitter {
   private isFirstConnection: boolean = true
   private readyPromise: Promise<void>
   private readonly rpcQueues = new Set<string>()
-  private readonly rpcListener = new Map<string, Function>()
+  private readonly rpcListener = new Map<string, (...args: unknown[]) => unknown>()
   private consumers = new Map<string, Set<IConsumer>>()
 
   /**
@@ -59,7 +58,7 @@ export class CarrotMQ extends EventEmitter {
    */
   public async connect(): Promise<Connection> {
     this.isConnecting = true
-    const connection  = await amqplib.connect(this.uri)
+    const connection  = await connect(this.uri)
     this.connection = connection
     connection.on('close', onclose.bind(this))
     connection.on('error', (err) => this.emit('error', err))
@@ -88,10 +87,10 @@ export class CarrotMQ extends EventEmitter {
    * @param {function} consumer consumer function
    * @param {Options.AssertQueue} [opts] see amqplib#assetQueue
    */
-  public async queue(queue: string, consumer: IConsumer, opts?: Options.AssertQueue) {
+  public async queue(queue: string, consumer: IConsumer, opts?: QueueOptions) {
     await this.awaitReady()
     this.addQueueConsumer(queue, consumer)
-    const channel = await this.createChannel(`queue:${queue}`)
+    const channel = opts.channel ?? await this.createChannel(`queue:${queue}`)
     if (!queue.startsWith('amq.') && queue !== this.config.callbackQueue?.queue) {
       await channel.assertQueue(queue, opts)
     }
@@ -142,7 +141,7 @@ export class CarrotMQ extends EventEmitter {
    * @returns {Promise.<void>}
    */
   public async sendToQueue(queue: string, message: MessageType,
-                    options: Options.Publish & {skipValidate?: boolean} = {}): Promise<void> {
+                           options: Options.Publish & {skipValidate?: boolean} = {}): Promise<void> {
     await this.awaitReady()
     const {content, contentType} = this.makeContent(message, {queue})
     options.contentType = contentType
@@ -179,12 +178,14 @@ export class CarrotMQ extends EventEmitter {
    * @returns {Bluebird.<void>}
    */
   public async rpcExchange(exchange: string, routingKey: string, message: MessageType,
-                    options: Options.Publish = {}): Promise<IRPCResult> {
+                           options: Options.Publish = {}): Promise<IRPCResult> {
     await this.awaitReady()
 
     const channel = await this.connection.createChannel()
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
-    const correlationId = Math.random().toString(16).substr(2)
+    const correlationId = Math.random()
+      .toString(16)
+      .substr(2)
     const callbackQueue = this.config.callbackQueue.queue + '-exchange'
     options.contentType = contentType
     options.appId = this.appId
@@ -218,7 +219,7 @@ export class CarrotMQ extends EventEmitter {
         this.rpcListener.set(correlationId, resolve)
       })
         .timeout(this.config.rpcTimeout, 'rpc timeout')
-      const rpcResult: IRPCResult = {
+      rpcResult = {
         _ack: false,
         data,
         properties: ctx.properties,
@@ -266,7 +267,9 @@ export class CarrotMQ extends EventEmitter {
         })).queue
       }
     }
-    const correlationId = Math.random().toString(16).substr(2)
+    const correlationId = Math.random()
+      .toString(16)
+      .substr(2)
 
     if (!this.rpcQueues.has(callbackQueue)) {
       this.rpcQueues.add(callbackQueue)
