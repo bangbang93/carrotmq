@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is'
 import {Channel, ConfirmChannel, connect, Connection, Options} from 'amqplib'
 import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
@@ -417,38 +418,37 @@ export default CarrotMQ
 export {Context, IConfig}
 
 function makeContent(content: MessageType): ICarrotMQMessage {
-  switch (true) {
-    case Buffer.isBuffer(content):
-      return {
-        content,
-        contentType: 'buffer',
-      }
-    case typeof content === 'string':
-      return {
-        content: Buffer.from(content, 'utf8'),
-        contentType: 'text/plain',
-      }
-    case typeof content === 'undefined':
-      return {
-        content: Buffer.from('undefined'),
-        contentType: 'undefined',
-      }
-    case typeof content === 'boolean':
-    case typeof content === 'number':
-    case typeof content === 'object':
-      return {
-        content: Buffer.from(JSON.stringify(content), 'utf8'),
-        contentType: 'application/json',
-      }
-    default:
-      throw new TypeError('unknown message')
+  if (is.buffer(content)) {
+    return {
+      content,
+      contentType: 'buffer',
+    }
   }
+  if (is.string(content)) {
+    return {
+      content: Buffer.from(content, 'utf8'),
+      contentType: 'text/plain',
+    }
+  }
+  if (is.undefined(content)) {
+    return {
+      content: Buffer.from('undefined'),
+      contentType: 'undefined',
+    }
+  }
+  if (is.primitive(content) || is.object(content)) {
+    return {
+      content: Buffer.from(JSON.stringify(content), 'utf8'),
+      contentType: 'application/json',
+    }
+  }
+  throw new TypeError('unknown message')
 }
 
 function decodeContent(content: ICarrotMQMessage): MessageType {
   switch (content.contentType) {
     case 'application/json':
-      return JSON.parse(content.content)
+      return JSON.parse(content.content.toString())
     case 'string':
     case 'text/plain':
       return content.content.toString('utf8')

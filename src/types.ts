@@ -1,6 +1,5 @@
 import {Channel, Options} from 'amqplib'
 import {Context} from './context'
-import CarrotMQ from './index'
 
 export interface IConfig {
   appId?: string
@@ -16,24 +15,24 @@ export interface IConfig {
 }
 
 export interface IRPCResult {
-  data: any
+  data: unknown
   _ack: boolean
   properties: object
   fields: object
   ack()
 }
 
-export type IConsumer = (this: Context, data: any, ctx: Context) => any
+export type IConsumer = (this: Context, data: unknown, ctx: Context) => Promise<void>
 
-export type MessageType = any | boolean | number | string | Buffer
+export type MessageType = unknown | boolean | number | string | Buffer
 
 export interface ICarrotMQMessage {
-  content: MessageType
+  content: Buffer
   contentType: string
 }
 
 export type MakeContentFunction =
-  (message: any, info: {queue?: string; exchange?: string; routingKey?: string}) => ICarrotMQMessage
+  (message: unknown, info: {queue?: string; exchange?: string; routingKey?: string}) => ICarrotMQMessage
 
 export interface QueueOptions extends Options.AssertQueue {
   channel?: Channel
