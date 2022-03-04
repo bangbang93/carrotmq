@@ -1,9 +1,12 @@
 import {Channel, ConfirmChannel, connect, Connection, Options} from 'amqplib'
 import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
+import {nanoid} from 'nanoid'
 import * as os from 'os'
 import {Context} from './context'
-import {ICarrotMQMessage, IConfig, IConsumer, IRPCResult, MakeContentFunction, MessageType, QueueOptions} from './types'
+import {
+  ICarrotMQMessage, IConfig, IConsumer, IConsumeResult, IRPCResult, MakeContentFunction, MessageType, QueueOptions,
+} from './types'
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -88,7 +91,7 @@ export class CarrotMQ extends EventEmitter {
    * @param {function} consumer consumer function
    * @param {Options.AssertQueue} [opts] see amqplib#assetQueue
    */
-  public async queue(queue: string, consumer: IConsumer, opts?: QueueOptions) {
+  public async queue(queue: string, consumer: IConsumer, opts?: QueueOptions): Promise<IConsumeResult> {
     await this.awaitReady()
     this.addQueueConsumer(queue, consumer)
     const channel = opts.channel ?? await this.createChannel(`queue:${queue}`)
@@ -159,7 +162,8 @@ export class CarrotMQ extends EventEmitter {
    * @param {object} [options] - see amqplib#publish
    * @returns {Bluebird.<void>}
    */
-  public async publish(exchange: string, routingKey: string, message: MessageType, options: Options.Publish = {}) {
+  public async publish(exchange: string, routingKey: string, message: MessageType,
+    options: Options.Publish = {}): Promise<void> {
     await this.awaitReady()
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     options.contentType = contentType
@@ -183,9 +187,7 @@ export class CarrotMQ extends EventEmitter {
 
     const channel = await this.connection.createChannel()
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
-    const correlationId = Math.random()
-      .toString(16)
-      .substr(2)
+    const correlationId = nanoid()
     const callbackQueue = `${this.config.callbackQueue.queue}-exchange`
     options.contentType = contentType
     options.appId = this.appId
@@ -267,9 +269,7 @@ export class CarrotMQ extends EventEmitter {
         })).queue
       }
     }
-    const correlationId = Math.random()
-      .toString(16)
-      .substr(2)
+    const correlationId = nanoid()
 
     if (!this.rpcQueues.has(callbackQueue)) {
       this.rpcQueues.add(callbackQueue)
@@ -355,14 +355,14 @@ export class CarrotMQ extends EventEmitter {
   /**
    * close connection
    */
-  public close() {
+  public async close(): Promise<void> {
     if (!this.connection) return
     this.manualClose = true
     this.ready = false
     return this.connection.close()
   }
 
-  private async awaitReady() {
+  private async awaitReady(): Promise<void> {
     if (!this.ready) {
       if (!this.isConnecting) throw new Error('no connection')
       if (!this.readyPromise) {
@@ -374,7 +374,7 @@ export class CarrotMQ extends EventEmitter {
     }
   }
 
-  private addQueueConsumer(queue: string, consumer: IConsumer) {
+  private addQueueConsumer(queue: string, consumer: IConsumer): void {
     let set = this.consumers.get(queue)
     if (!set) {
       set = new Set()
@@ -383,12 +383,12 @@ export class CarrotMQ extends EventEmitter {
     set.add(consumer)
   }
 
-  private removeQueueConsumer(queue: string, consumer: IConsumer) {
+  private removeQueueConsumer(queue: string, consumer: IConsumer): void {
     const consumers = this.consumers.get(queue)
     consumers.delete(consumer)
   }
 
-  private async restoreConsumer() {
+  private async restoreConsumer(): Promise<void> {
     for (const [queue, consumers] of this.consumers) {
       for (const consumer of consumers) {
         await this.queue(queue, consumer)
@@ -396,7 +396,7 @@ export class CarrotMQ extends EventEmitter {
     }
   }
 
-  private onclose(this: CarrotMQ, arg) {
+  private onclose(this: CarrotMQ, arg): void {
     this.connection = null
     this.ready = false
     if (!this.manualClose && this.config.reconnect && this.connectTry < this.config.reconnect.times) {

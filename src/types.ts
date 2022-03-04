@@ -23,25 +23,6 @@ export interface IRPCResult {
   ack()
 }
 
-/**
- * @deprecated Use class Context instead
- */
-export interface IContext {
-  message: any
-  fields: any
-  properties: any
-  replyTo: string
-  content: Buffer | object
-  carrotmq: CarrotMQ
-  channel: Channel
-  _isAcked: boolean
-  reply(msg: any, options?: Options.Publish): Promise<void>
-  ack(allUpTo?: boolean): void
-  nack(allUpTo?: boolean, requeue?: boolean): void
-  reject(requeue?: boolean): void
-  cancel(): Promise<void>
-}
-
 export type IConsumer = (this: Context, data: any, ctx: Context) => any
 
 export type MessageType = any | boolean | number | string | Buffer
@@ -62,4 +43,10 @@ declare module 'amqplib' {
   interface Channel {
     reason: string
   }
+}
+
+export interface IConsumeResult {
+  consumerTag: string
+  channel: Channel
+  queue: string
 }

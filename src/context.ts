@@ -1,9 +1,8 @@
 import {Channel, Message, MessageFields, MessageProperties, Options} from 'amqplib'
 import {EventEmitter} from 'events'
 import CarrotMQ from './index'
-import {IContext} from './types'
 
-export class Context extends EventEmitter implements IContext {
+export class Context extends EventEmitter {
   public replyTo: string
   public fields: MessageFields
   public properties: MessageProperties
