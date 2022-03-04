@@ -10,10 +10,6 @@ export class Context extends EventEmitter implements IContext {
 
   public isAcked: boolean
 
-  get _isAcked() {
-    return this.isAcked
-  }
-
   constructor(
     public message: Message,
     public carrotmq: CarrotMQ,
@@ -26,7 +22,11 @@ export class Context extends EventEmitter implements IContext {
     this.properties = message.properties
   }
 
-  public reply(msg: any, options?: Options.Publish) {
+  get _isAcked() {
+    return this.isAcked
+  }
+
+  public async reply(msg: any, options?: Options.Publish) {
     const replyTo = this.replyTo
     if (!replyTo) throw new Error('empty reply queue')
     options = {...this.message.properties, ...options, appId: this.carrotmq.appId}
