@@ -4,6 +4,7 @@ import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
 import {nanoid} from 'nanoid'
 import * as os from 'os'
+import VError = require('verror')
 import {Context} from './context'
 import {
   ICarrotMQMessage, IConfig, IConsumer, IConsumeResult, IRPCResult, MakeContentFunction, MessageType, QueueOptions,
@@ -200,14 +201,11 @@ export class CarrotMQ extends EventEmitter {
         const correlationId = ctx.properties.correlationId
         const listener = this.rpcListener.get(correlationId)
         if (!listener) {
-          const err = new Error('no such listener')
-          err['correlationId'] = correlationId
-          err['exchange'] = exchange
-          err['routingKey'] = routingKey
-          err['data'] = data
-          err['queue'] = callbackQueue
-          ctx.ack()
-          this.emit('error', err)
+          this.emit('error', new VError({
+            info: {
+              correlationId, exchange, routingKey, data, queue: callbackQueue,
+            },
+          }, 'no such listener'))
         } else {
           listener({data, ctx})
         }
@@ -236,11 +234,15 @@ export class CarrotMQ extends EventEmitter {
       return rpcResult
     } catch (err) {
       if (err instanceof Bluebird.TimeoutError) {
-        err['exchange'] = exchange
-        err['routingKey'] = routingKey
-        err['data'] = message
+        throw new VError({
+          info: {
+            exchange, routingKey, data: message,
+          },
+          cause: err,
+        }, 'rpc timeout')
+      } else {
+        throw err
       }
-      throw err
     } finally {
       if (rpcResult) {
         await rpcResult.ack()
@@ -278,12 +280,12 @@ export class CarrotMQ extends EventEmitter {
         const correlationId = ctx.properties.correlationId
         const listener = this.rpcListener.get(correlationId)
         if (!listener) {
-          const err = new Error('no such listener')
-          err['correlationId'] = correlationId
-          err['data'] = data
-          err['queue'] = callbackQueue
           ctx.ack()
-          this.emit('error', err)
+          this.emit('error', new VError({
+            info: {
+              correlationId, data, queue: callbackQueue,
+            },
+          }, 'no such listener'))
         } else {
           listener({data, ctx})
         }
@@ -318,10 +320,15 @@ export class CarrotMQ extends EventEmitter {
       return rpcResult
     } catch (err) {
       if (err instanceof Bluebird.TimeoutError) {
-        err['queue'] = queue
-        err['data'] = message
+        throw new VError({
+          info: {
+            queue, data: message,
+          },
+          cause: err,
+        }, 'rpc timeout')
+      } else {
+        throw err
       }
-      throw err
     } finally {
       if (rpcResult) {
         await rpcResult.ack()
