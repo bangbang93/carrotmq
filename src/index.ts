@@ -96,7 +96,7 @@ export class CarrotMQ extends EventEmitter {
   public async queue(queue: string, consumer: IConsumer, opts?: QueueOptions): Promise<IConsumeResult> {
     await this.awaitReady()
     this.addQueueConsumer(queue, consumer)
-    const channel = opts.channel ?? await this.createChannel(`queue:${queue}`)
+    const channel = opts?.channel ?? await this.createChannel(`queue:${queue}`)
     if (!queue.startsWith('amq.') && queue !== this.config.callbackQueue?.queue) {
       await channel.assertQueue(queue, opts)
     }
