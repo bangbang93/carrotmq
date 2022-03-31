@@ -16,12 +16,14 @@ a much easy way to use rabbitmq
 [documentation](https://bangbang93.github.io/carrotmq)
 
 ## usage
-```javascript
+```typescript
 const {CarrotMQ} = require('carrotmq');
 
 const mq = new CarrotMQ('amqp://localhost');
+await mq.connect()
 
 const publisher = new CarrotMQ('amqp://localhost'); //also can use without schema
+await publisher.connect()
 
 mq.queue('fooQueue', async (data, ctx) => {
     console.log(data);
