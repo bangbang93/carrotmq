@@ -18,8 +18,6 @@ a much easy way to use rabbitmq
 ## usage
 ```javascript
 const {CarrotMQ} = require('carrotmq');
-//var rabbitmqSchema = require('rabbitmq-schema');
-const rabbitmqSchema = CarrotMQ.schema;
 
 const mq = new CarrotMQ('amqp://localhost');
 
@@ -64,14 +62,6 @@ mq.rpc('carrotmq.rpc', {data: 'foo'}, 'carrotmq.rpc.callback')
 
 ## RPC Over Exchange
 ```javascript
-
-//{
-//    routingPattern: 'rpc.#',
-//   destination: {
-//      queue: 'rpcQueue',
-//      messageSchema: {}
-//    }
-//  }
 
 app.queue('rpcQueue', async (data, ctx) => {
   await ctx.reply(data);
