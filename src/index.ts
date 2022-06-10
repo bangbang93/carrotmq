@@ -210,7 +210,7 @@ export class CarrotMQ extends EventEmitter {
           listener({data, ctx})
         }
         this.rpcListener.delete(correlationId)
-      })
+      }, this.config.callbackQueue.options)
     }
     channel.publish(exchange, routingKey, content, options)
     let rpcResult: IRPCResult
