@@ -12,6 +12,7 @@ export interface IConfig {
     timeout: number
     times: number
   } | false
+  autoMessageId?: boolean
 }
 
 export interface IRPCResult {

@@ -4,11 +4,11 @@ import * as Bluebird from 'bluebird'
 import {EventEmitter} from 'events'
 import {nanoid} from 'nanoid'
 import * as os from 'os'
-import VError = require('verror')
 import {Context} from './context'
 import {
   ICarrotMQMessage, IConfig, IConsumer, IConsumeResult, IRPCResult, MakeContentFunction, MessageType, QueueOptions,
 } from './types'
+import VError = require('verror')
 
 const defaultConfig: IConfig = {
   rpcTimeout: 30e3,
@@ -18,6 +18,7 @@ const defaultConfig: IConfig = {
     timeout: 3e3,
     times: 5,
   },
+  autoMessageId: false,
 }
 
 /**
@@ -151,6 +152,9 @@ export class CarrotMQ extends EventEmitter {
     const {content, contentType} = this.makeContent(message, {queue})
     options.contentType = contentType
     options.appId = this.appId
+    if (options.messageId === undefined && this.config.autoMessageId) {
+      options.messageId = nanoid()
+    }
     const channel = await this.createChannel(`sendToQueue:${queue}`)
     channel.sendToQueue(queue, content, options)
     await channel.close()
@@ -170,6 +174,9 @@ export class CarrotMQ extends EventEmitter {
     const {content, contentType} = this.makeContent(message, {exchange, routingKey})
     options.contentType = contentType
     options.appId = this.appId
+    if (options.messageId === undefined && this.config.autoMessageId) {
+      options.messageId = nanoid()
+    }
     const channel = await this.createChannel(`publish:${exchange}`)
     channel.publish(exchange, routingKey, content, options)
     await channel.close()
@@ -195,6 +202,9 @@ export class CarrotMQ extends EventEmitter {
     options.appId = this.appId
     options.replyTo = callbackQueue
     options.correlationId = correlationId
+    if (options.messageId === undefined && this.config.autoMessageId) {
+      options.messageId = nanoid()
+    }
     if (!this.rpcQueues.has(callbackQueue)) {
       this.rpcQueues.add(callbackQueue)
       await this.queue(callbackQueue, async (data, ctx) => {
@@ -293,13 +303,18 @@ export class CarrotMQ extends EventEmitter {
       })
     }
 
-    let rpcResult: IRPCResult
-    channel.sendToQueue(queue, content, {
+    const options: Options.Publish = {
       replyTo: callbackQueue,
       correlationId,
       contentType,
       appId: this.appId,
-    })
+    }
+
+    if (options.messageId === undefined && this.config.autoMessageId) {
+      options.messageId = nanoid()
+    }
+    let rpcResult: IRPCResult
+    channel.sendToQueue(queue, content, options)
 
     try {
       const {data, ctx} = await new Bluebird<{data; ctx: Context}>((resolve) => {
