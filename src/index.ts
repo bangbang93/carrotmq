@@ -379,6 +379,7 @@ export class CarrotMQ extends EventEmitter {
    * close connection
    */
   public async close(): Promise<void> {
+    this.isConnecting = false
     if (!this.connection) return
     this.manualClose = true
     this.ready = false
